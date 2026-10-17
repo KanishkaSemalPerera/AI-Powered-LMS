@@ -81,6 +81,28 @@ Roles: **Public** = no token · **Auth** = any signed-in active user.
 | POST | `/instructor/courses/{id}/thumbnail` | Upload thumbnail (`multipart/form-data`, field `thumbnail`: jpg/png/webp, ≤ 4 MB, ≥ 640×360) |
 | POST | `/instructor/courses/{id}/submit` | Submit for review. 422 lists what is missing: `category_id`, `description` (≥ 100 chars), `lessons` (≥ 1) |
 
+### Course builder — role `instructor`, own courses only (locked while pending review)
+
+| Method | URL | Description |
+|---|---|---|
+| GET | `/instructor/courses/{id}/curriculum` | Sections with full lessons (content, `playback_url`) |
+| PUT | `/instructor/courses/{id}/curriculum/order` | Save the complete order: `{ "sections": [{ "id": 3, "lessons": [7, 5] }, …] }`. Lessons may move between sections; every section/lesson of the course must appear exactly once (422 otherwise) |
+| POST | `/instructor/courses/{id}/sections` | Add section `{ title }` (appended at the end) |
+| PUT | `/instructor/sections/{id}` | Rename section `{ title }` |
+| DELETE | `/instructor/sections/{id}` | Delete section with its lessons and uploaded videos |
+| POST | `/instructor/sections/{id}/lessons` | Add lesson `{ title, type: video\|text, content?, video_url?, duration_minutes?, is_preview? }` |
+| GET | `/instructor/lessons/{id}` | Full lesson |
+| PUT | `/instructor/lessons/{id}` | Update lesson (a new `video_url` replaces an uploaded file; switching to `text` deletes the video) |
+| DELETE | `/instructor/lessons/{id}` | Delete lesson and its video |
+| POST | `/instructor/lessons/{id}/video` | Upload video (`multipart/form-data`: `video` mp4/webm/mov ≤ 500 MB, optional `duration_seconds`) |
+| DELETE | `/instructor/lessons/{id}/video` | Remove the uploaded video |
+
+### Lesson video playback
+
+| Method | URL | Role | Description |
+|---|---|---|---|
+| GET | `/lessons/{id}/video?expires=…&signature=…` | Signed URL | Streams a private uploaded video (supports HTTP Range for seeking). The URL comes from a lesson's `playback_url`, expires after `LESSON_VIDEO_URL_TTL` minutes (default 240), and returns 403 if missing or tampered |
+
 ### Admin — role `admin`
 
 | Method | URL | Description |

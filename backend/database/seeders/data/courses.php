@@ -6,14 +6,16 @@
 |--------------------------------------------------------------------------
 |
 | Real lesson text (Markdown) so the AI study assistant and quiz generator
-| have meaningful content to work with. Video lessons use short public
-| sample clips from Google's test bucket and keep their notes in "content".
+| have meaningful content to work with. Video lessons play a short public
+| sample clip and keep their notes in "content".
 |
 | Lesson "duration" is in minutes. A lesson may carry one "quiz".
 |
 */
 
-$video = fn (string $name) => "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/{$name}.mp4";
+// Every demo video lesson uses the same short CC0-licensed clip hosted by MDN.
+// The name argument only labels which lesson the clip stands in for.
+$video = fn (string $name) => 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4';
 
 return [
 

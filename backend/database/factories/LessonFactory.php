@@ -26,7 +26,7 @@ class LessonFactory extends Factory
         ];
     }
 
-    public function video(string $url = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4'): static
+    public function video(string $url = 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4'): static
     {
         return $this->state(fn () => ['type' => LessonType::Video, 'video_url' => $url]);
     }

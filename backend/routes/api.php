@@ -8,6 +8,8 @@ use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\CourseController;
 use App\Http\Controllers\Api\V1\HealthController;
 use App\Http\Controllers\Api\V1\Instructor\CourseController as InstructorCourseController;
+use App\Http\Controllers\Api\V1\Instructor\CurriculumController;
+use App\Http\Controllers\Api\V1\LessonVideoController;
 use App\Http\Controllers\Api\V1\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -30,6 +32,9 @@ Route::get('/health', HealthController::class)->name('health');
 Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
 Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
 Route::get('/courses/{course:slug}', [CourseController::class, 'show'])->name('courses.show');
+
+// Uploaded lesson video playback. Access is granted by the temporary URL signature.
+Route::get('/lessons/{lesson}/video', LessonVideoController::class)->middleware('signed')->name('lessons.video');
 
 // ------------------------------------------------------------------ Auth
 Route::prefix('auth')->name('auth.')->group(function () {
@@ -62,6 +67,19 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
         Route::delete('/courses/{course}', [InstructorCourseController::class, 'destroy'])->name('courses.destroy');
         Route::post('/courses/{course}/thumbnail', [InstructorCourseController::class, 'updateThumbnail'])->name('courses.thumbnail');
         Route::post('/courses/{course}/submit', [InstructorCourseController::class, 'submit'])->name('courses.submit');
+
+        // Course builder
+        Route::get('/courses/{course}/curriculum', [CurriculumController::class, 'show'])->name('curriculum.show');
+        Route::put('/courses/{course}/curriculum/order', [CurriculumController::class, 'reorder'])->name('curriculum.reorder');
+        Route::post('/courses/{course}/sections', [CurriculumController::class, 'storeSection'])->name('sections.store');
+        Route::put('/sections/{section}', [CurriculumController::class, 'updateSection'])->name('sections.update');
+        Route::delete('/sections/{section}', [CurriculumController::class, 'destroySection'])->name('sections.destroy');
+        Route::post('/sections/{section}/lessons', [CurriculumController::class, 'storeLesson'])->name('lessons.store');
+        Route::get('/lessons/{lesson}', [CurriculumController::class, 'showLesson'])->name('lessons.show');
+        Route::put('/lessons/{lesson}', [CurriculumController::class, 'updateLesson'])->name('lessons.update');
+        Route::delete('/lessons/{lesson}', [CurriculumController::class, 'destroyLesson'])->name('lessons.destroy');
+        Route::post('/lessons/{lesson}/video', [CurriculumController::class, 'uploadVideo'])->name('lessons.video.store');
+        Route::delete('/lessons/{lesson}/video', [CurriculumController::class, 'destroyVideo'])->name('lessons.video.destroy');
     });
 
     // -------------------------------------------------------------- Admin

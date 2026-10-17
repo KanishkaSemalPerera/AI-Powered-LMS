@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\CourseStatus;
+use App\Enums\LessonType;
 use App\Models\Course;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
@@ -18,6 +19,8 @@ class CourseService
 {
     /** Minimum description length before a course can be submitted for review. */
     private const MIN_DESCRIPTION_LENGTH = 100;
+
+    public function __construct(private readonly LessonVideoService $videos) {}
 
     public function create(User $instructor, array $data): Course
     {
@@ -54,14 +57,15 @@ class CourseService
 
     public function delete(Course $course): void
     {
-        DB::transaction(function () use ($course) {
-            $thumbnail = $course->thumbnail_path;
-            $course->delete();
+        $thumbnail = $course->thumbnail_path;
 
-            if ($thumbnail) {
-                Storage::disk(config('filesystems.default'))->delete($thumbnail);
-            }
-        });
+        DB::transaction(fn () => $course->delete());
+
+        // Files are removed only after the database delete succeeded.
+        if ($thumbnail) {
+            Storage::disk(config('filesystems.default'))->delete($thumbnail);
+        }
+        $this->videos->removeCourseVideos($course->id);
     }
 
     /**
@@ -111,8 +115,19 @@ class CourseService
         if (mb_strlen(strip_tags((string) $course->description)) < self::MIN_DESCRIPTION_LENGTH) {
             $missing['description'] = ['Write a description of at least '.self::MIN_DESCRIPTION_LENGTH.' characters.'];
         }
-        if (! $course->lessons()->exists()) {
+        $lessons = $course->lessons()->get(['id', 'title', 'type', 'video_path', 'video_url', 'content']);
+
+        if ($lessons->isEmpty()) {
             $missing['lessons'] = ['Add at least one lesson to the curriculum.'];
+        } else {
+            // Video lessons need a video; text lessons need content.
+            $incomplete = $lessons->filter(fn ($lesson) => $lesson->type === LessonType::Video
+                ? blank($lesson->video_path) && blank($lesson->video_url)
+                : blank(trim(strip_tags((string) $lesson->content))));
+
+            if ($incomplete->isNotEmpty()) {
+                $missing['lessons'] = ['These lessons are empty: '.$incomplete->pluck('title')->map(fn ($t) => "“{$t}”")->join(', ').'.'];
+            }
         }
 
         if ($missing) {
