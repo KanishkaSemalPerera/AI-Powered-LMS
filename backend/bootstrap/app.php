@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Middleware\EnsureUserHasRole;
+use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Middleware\ForceJsonResponse;
 use App\Support\ApiResponse;
 use Illuminate\Auth\AuthenticationException;
@@ -22,6 +24,14 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->api(prepend: [
             ForceJsonResponse::class,
+        ]);
+
+        // General per-user/IP limit for every API route ("api" limiter in AppServiceProvider).
+        $middleware->throttleApi();
+
+        $middleware->alias([
+            'role' => EnsureUserHasRole::class,
+            'active' => EnsureUserIsActive::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

@@ -3,7 +3,10 @@ import { tokenStorage } from '@/utils/storage'
 
 export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1'
 
-/** Event fired when the API rejects our token, so AuthContext can log the user out. */
+/**
+ * Fired when the API rejects our token (expired, revoked or account deactivated),
+ * so AuthProvider can sign the user out. event.detail.reason: 'expired' | 'deactivated'.
+ */
 export const UNAUTHORIZED_EVENT = 'lms:unauthorized'
 
 const client = axios.create({
@@ -23,14 +26,19 @@ client.interceptors.request.use((config) => {
   return config
 })
 
-// A 401 on a request that carried a token means it expired or was revoked.
 client.interceptors.response.use(
   (response) => response,
   (error) => {
     const hadToken = Boolean(error.config?.headers?.Authorization)
-    if (error.response?.status === 401 && hadToken) {
+    const status = error.response?.status
+    const deactivated = status === 403 && Boolean(error.response?.data?.errors?.account)
+
+    // A 401 on a request that carried a token means it expired or was revoked.
+    if (hadToken && (status === 401 || deactivated)) {
       tokenStorage.clear()
-      window.dispatchEvent(new CustomEvent(UNAUTHORIZED_EVENT))
+      window.dispatchEvent(
+        new CustomEvent(UNAUTHORIZED_EVENT, { detail: { reason: deactivated ? 'deactivated' : 'expired' } }),
+      )
     }
     return Promise.reject(error)
   },

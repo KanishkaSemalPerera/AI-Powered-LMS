@@ -1,6 +1,8 @@
+import { Suspense } from 'react'
 import { Outlet } from 'react-router'
 import Footer from '@/components/layout/Footer'
 import Navbar from '@/components/layout/Navbar'
+import PageLoader from '@/components/ui/PageLoader'
 
 /** Public site shell: sticky navbar, page content, footer. */
 export default function MainLayout() {
@@ -14,7 +16,9 @@ export default function MainLayout() {
       </a>
       <Navbar />
       <main id="main-content" className="flex-1">
-        <Outlet />
+        <Suspense fallback={<PageLoader />}>
+          <Outlet />
+        </Suspense>
       </main>
       <Footer />
     </div>

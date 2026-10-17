@@ -1,11 +1,26 @@
 import { useQuery } from '@tanstack/react-query'
-import { Award, Bot, Brain, ChartColumn, CircleAlert, CircleCheck, Database, Server, Sparkles } from 'lucide-react'
+import {
+  ArrowRight,
+  Award,
+  Bot,
+  Brain,
+  ChartColumn,
+  CircleAlert,
+  CircleCheck,
+  Database,
+  Server,
+  Sparkles,
+} from 'lucide-react'
+import { Link } from 'react-router'
 import { getHealth } from '@/api/system'
 import Button from '@/components/ui/Button'
+import { buttonClasses } from '@/components/ui/buttonStyles'
 import Skeleton from '@/components/ui/Skeleton'
+import { useAuth } from '@/hooks/useAuth'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { getErrorMessage } from '@/utils/apiError'
 import { cn } from '@/utils/cn'
+import { dashboardPath } from '@/utils/roles'
 
 const features = [
   {
@@ -106,6 +121,33 @@ function SystemStatus() {
   )
 }
 
+function HeroActions() {
+  const { user } = useAuth()
+
+  if (user) {
+    return (
+      <div className="mt-8 flex flex-wrap gap-3">
+        <Link to={dashboardPath(user.role)} className={buttonClasses({ size: 'lg' })}>
+          Go to my dashboard
+          <ArrowRight className="size-4" aria-hidden="true" />
+        </Link>
+      </div>
+    )
+  }
+
+  return (
+    <div className="mt-8 flex flex-wrap gap-3">
+      <Link to="/register" className={buttonClasses({ size: 'lg' })}>
+        Get started — it&apos;s free
+        <ArrowRight className="size-4" aria-hidden="true" />
+      </Link>
+      <Link to="/login" className={buttonClasses({ size: 'lg', variant: 'outline' })}>
+        Log in
+      </Link>
+    </div>
+  )
+}
+
 export default function HomePage() {
   useDocumentTitle('Learn anything, smarter')
 
@@ -129,6 +171,7 @@ export default function HomePage() {
               Expert-led courses, AI-generated practice quizzes, a lesson-aware study assistant and verified
               certificates — all in one place.
             </p>
+            <HeroActions />
           </div>
           <SystemStatus />
         </div>
