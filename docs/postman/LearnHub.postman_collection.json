@@ -1,0 +1,835 @@
+{
+  "info": {
+    "name": "LearnHub LMS API",
+    "description": "LearnHub REST API (/api/v1). Run Auth > Login first: it saves the token into the collection variable {{token}}.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000/api/v1"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "email",
+      "value": "student1@lms.test"
+    },
+    {
+      "key": "password",
+      "value": "password"
+    },
+    {
+      "key": "courseId",
+      "value": "1"
+    },
+    {
+      "key": "courseSlug",
+      "value": "modern-javascript-from-scratch"
+    },
+    {
+      "key": "categoryId",
+      "value": "1"
+    },
+    {
+      "key": "sectionId",
+      "value": "1"
+    },
+    {
+      "key": "lessonId",
+      "value": "1"
+    },
+    {
+      "key": "sessionId",
+      "value": ""
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.request.headers.upsert({ key: 'Accept', value: 'application/json' });"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "System",
+      "item": [
+        {
+          "name": "Health",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "url": "{{baseUrl}}/health"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "if (body.success && body.data && body.data.token) { pm.collectionVariables.set('token', body.data.token); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jane Learner\",\n  \"email\": \"jane{{$randomInt}}@example.com\",\n  \"password\": \"secret123\",\n  \"password_confirmation\": \"secret123\",\n  \"role\": \"student\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('logged in', () => pm.expect(body.success).to.be.true);",
+                  "if (body.success && body.data && body.data.token) { pm.collectionVariables.set('token', body.data.token); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Me",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/auth/me"
+          }
+        },
+        {
+          "name": "Logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('token', '');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/logout"
+          }
+        },
+        {
+          "name": "Forgot password",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/forgot-password",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Reset password",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/reset-password",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"PASTE_TOKEN_FROM_EMAIL_IN_LARAVEL_LOG\",\n  \"email\": \"{{email}}\",\n  \"password\": \"newsecret123\",\n  \"password_confirmation\": \"newsecret123\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Profile",
+      "item": [
+        {
+          "name": "Update profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/profile",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Emma Wilson\",\n  \"email\": \"{{email}}\",\n  \"headline\": \"Aspiring web developer\",\n  \"bio\": \"Learning React and Laravel.\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Upload avatar",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/profile/avatar",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "avatar",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Remove avatar",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/profile/avatar"
+          }
+        },
+        {
+          "name": "Change password",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/profile/password",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"current_password\": \"{{password}}\",\n  \"password\": \"newsecret123\",\n  \"password_confirmation\": \"newsecret123\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Catalogue",
+      "item": [
+        {
+          "name": "Categories",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "url": "{{baseUrl}}/categories"
+          }
+        },
+        {
+          "name": "Courses (search & filter)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/courses?q=&category=&level=&price=&min_rating=&sort=popular&per_page=12&page=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "courses"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": ""
+                },
+                {
+                  "key": "category",
+                  "value": ""
+                },
+                {
+                  "key": "level",
+                  "value": ""
+                },
+                {
+                  "key": "price",
+                  "value": ""
+                },
+                {
+                  "key": "min_rating",
+                  "value": ""
+                },
+                {
+                  "key": "sort",
+                  "value": "popular"
+                },
+                {
+                  "key": "per_page",
+                  "value": "12"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Course detail",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "url": "{{baseUrl}}/courses/{{courseSlug}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Instructor (log in as instructor1@lms.test)",
+      "item": [
+        {
+          "name": "My courses",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/instructor/courses"
+          }
+        },
+        {
+          "name": "Create course",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const b=pm.response.json(); if(b.success){pm.collectionVariables.set(\"courseId\", b.data.id); pm.collectionVariables.set(\"courseSlug\", b.data.slug);}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/instructor/courses",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"My New Course\",\n  \"subtitle\": \"Learn something great\",\n  \"category_id\": 1,\n  \"level\": \"beginner\",\n  \"price\": 19.99,\n  \"what_you_will_learn\": [\n    \"First outcome\"\n  ],\n  \"requirements\": []\n}"
+            }
+          }
+        },
+        {
+          "name": "Get my course",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/instructor/courses/{{courseId}}"
+          }
+        },
+        {
+          "name": "Update course",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/instructor/courses/{{courseId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"My New Course (updated)\",\n  \"price\": 0\n}"
+            }
+          }
+        },
+        {
+          "name": "Upload thumbnail",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/instructor/courses/{{courseId}}/thumbnail",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "thumbnail",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Submit for review",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/instructor/courses/{{courseId}}/submit"
+          }
+        },
+        {
+          "name": "Delete course",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/instructor/courses/{{courseId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin (log in as admin@lms.test)",
+      "item": [
+        {
+          "name": "Pending courses",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/admin/courses?status=pending"
+          }
+        },
+        {
+          "name": "Approve course",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/admin/courses/{{courseId}}/approve"
+          }
+        },
+        {
+          "name": "Reject course",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/admin/courses/{{courseId}}/reject",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Please add more detail to the description.\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Categories",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/admin/categories"
+          }
+        },
+        {
+          "name": "Create category",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const b=pm.response.json(); if(b.success){pm.collectionVariables.set(\"categoryId\", b.data.id);}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/admin/categories",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Music Production\",\n  \"description\": \"Make and mix music.\",\n  \"icon\": \"music\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update category",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/admin/categories/{{categoryId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Audio Production\",\n  \"icon\": \"music\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete category",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/admin/categories/{{categoryId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Course builder (log in as instructor1@lms.test)",
+      "item": [
+        {
+          "name": "Get curriculum",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/instructor/courses/{{courseId}}/curriculum"
+          }
+        },
+        {
+          "name": "Add section",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const b=pm.response.json(); if(b.success){pm.collectionVariables.set(\"sectionId\", b.data.id);}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/instructor/courses/{{courseId}}/sections",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Getting started\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Rename section",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/instructor/sections/{{sectionId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Introduction\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Add text lesson",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const b=pm.response.json(); if(b.success){pm.collectionVariables.set(\"lessonId\", b.data.id);}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/instructor/sections/{{sectionId}}/lessons",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Welcome\",\n  \"type\": \"text\",\n  \"content\": \"## Welcome\\n\\nWhat this course covers.\",\n  \"duration_minutes\": 5,\n  \"is_preview\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Add video-link lesson",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/instructor/sections/{{sectionId}}/lessons",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Intro video\",\n  \"type\": \"video\",\n  \"video_url\": \"https://www.youtube.com/watch?v=dQw4w9WgXcQ\",\n  \"duration_minutes\": 3\n}"
+            }
+          }
+        },
+        {
+          "name": "Update lesson",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/instructor/lessons/{{lessonId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Welcome to the course\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Upload lesson video",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/instructor/lessons/{{lessonId}}/video",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "video",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "duration_seconds",
+                  "value": "120",
+                  "type": "text"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Remove lesson video",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/instructor/lessons/{{lessonId}}/video"
+          }
+        },
+        {
+          "name": "Reorder curriculum",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/instructor/courses/{{courseId}}/curriculum/order",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sections\": [\n    {\n      \"id\": 1,\n      \"lessons\": [\n        2,\n        1\n      ]\n    }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete lesson",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/instructor/lessons/{{lessonId}}"
+          }
+        },
+        {
+          "name": "Delete section",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/instructor/sections/{{sectionId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Student enrollment & payments (log in as a student)",
+      "item": [
+        {
+          "name": "Enroll in free course",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/courses/{{courseId}}/enroll"
+          }
+        },
+        {
+          "name": "Start checkout (paid course)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const b=pm.response.json(); if(b.success){pm.collectionVariables.set(\"sessionId\", b.data.session_id); console.log(\"Open in browser:\", b.data.checkout_url);}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/courses/{{courseId}}/checkout"
+          }
+        },
+        {
+          "name": "Confirm checkout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/checkout/confirm",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"session_id\": \"{{sessionId}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "My courses",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/my/courses?status=&page=1"
+          }
+        },
+        {
+          "name": "Payment history",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/payments"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Course player (log in as an enrolled student)",
+      "item": [
+        {
+          "name": "Player: curriculum & progress",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/learn/{{courseSlug}}"
+          }
+        },
+        {
+          "name": "Player: lesson",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/learn/{{courseSlug}}/lessons/{{lessonId}}"
+          }
+        },
+        {
+          "name": "Mark lesson complete",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/learn/{{courseSlug}}/lessons/{{lessonId}}/complete"
+          }
+        },
+        {
+          "name": "Mark lesson not complete",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/learn/{{courseSlug}}/lessons/{{lessonId}}/complete"
+          }
+        },
+        {
+          "name": "Free preview lesson (public)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "url": "{{baseUrl}}/courses/{{courseSlug}}/lessons/{{lessonId}}/preview"
+          }
+        }
+      ]
+    }
+  ]
+}
