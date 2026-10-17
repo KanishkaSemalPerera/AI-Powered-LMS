@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\AiFeature;
 use App\Enums\AiRequestStatus;
+use Database\Factories\AiRequestFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 /** One row per call to the Claude API, for usage tracking and rate-limit reporting. */
 class AiRequest extends Model
 {
-    /** @use HasFactory<\Database\Factories\AiRequestFactory> */
+    /** @use HasFactory<AiRequestFactory> */
     use HasFactory;
 
     protected $guarded = ['id'];

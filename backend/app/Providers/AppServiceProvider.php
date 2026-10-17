@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Contracts\AiClient;
 use App\Contracts\PaymentGateway;
+use App\Services\Ai\ClaudeClient;
 use App\Services\Payments\StripeGateway;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -20,6 +22,8 @@ class AppServiceProvider extends ServiceProvider
     {
         // Swap the payment provider (or a fake in tests) by rebinding this interface.
         $this->app->bind(PaymentGateway::class, StripeGateway::class);
+        // Claude through the Anthropic SDK; tests bind a fake AiClient.
+        $this->app->singleton(AiClient::class, ClaudeClient::class);
     }
 
     public function boot(): void
@@ -71,6 +75,17 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('password-reset', function (Request $request) {
             return Limit::perMinute(5)->by($request->ip());
+        });
+
+        // AI requests cost money: per-user burst limit (the daily cap is enforced in AiService).
+        RateLimiter::for('ai', function (Request $request) {
+            return Limit::perMinute((int) config('services.anthropic.rate_limit_per_minute'))
+                ->by('ai:'.($request->user()?->id ?: $request->ip()));
+        });
+
+        // Discourages brute-forcing answers by rapid resubmission.
+        RateLimiter::for('quiz-attempts', function (Request $request) {
+            return Limit::perMinute(10)->by($request->user()?->id ?: $request->ip());
         });
 
         // Each checkout creates a Stripe session; stop accidental or abusive loops.

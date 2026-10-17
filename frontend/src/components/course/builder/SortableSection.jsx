@@ -36,7 +36,7 @@ function TitleEditor({ title, onSave, onCancel }) {
   )
 }
 
-export default function SortableSection({ section, index, disabled, onRename, onDelete, onAddLesson, onEditLesson, onDeleteLesson }) {
+export default function SortableSection({ courseId, section, index, disabled, onRename, onDelete, onAddLesson, onEditLesson, onDeleteLesson }) {
   const [editing, setEditing] = useState(false)
   const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({
     id: `section-${section.id}`,
@@ -110,6 +110,7 @@ export default function SortableSection({ section, index, disabled, onRename, on
           {section.lessons.map((lesson) => (
             <SortableLesson
               key={lesson.id}
+              courseId={courseId}
               lesson={lesson}
               disabled={disabled}
               onEdit={() => onEditLesson(lesson)}

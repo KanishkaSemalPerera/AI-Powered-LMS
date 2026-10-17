@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Lesson;
 use App\Services\LessonVideoService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -10,7 +11,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * Full lesson including content and a playback URL. Only returned to people
  * allowed to watch it (the instructor now; enrolled students in the player).
  *
- * @mixin \App\Models\Lesson
+ * @mixin Lesson
  */
 class LessonResource extends JsonResource
 {
@@ -31,6 +32,13 @@ class LessonResource extends JsonResource
             'duration_seconds' => $this->duration_seconds,
             'is_preview' => $this->is_preview,
             'position' => $this->position,
+            // Builder badge: draft/published quiz and its size.
+            'quiz' => $this->whenLoaded('quiz', fn () => $this->quiz ? [
+                'id' => $this->quiz->id,
+                'status' => $this->quiz->status->value,
+                'questions_count' => $this->quiz->questions_count ?? $this->quiz->questions()->count(),
+                'is_ai_generated' => $this->quiz->is_ai_generated,
+            ] : null),
         ];
     }
 }

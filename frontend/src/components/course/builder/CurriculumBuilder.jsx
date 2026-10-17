@@ -219,6 +219,7 @@ export default function CurriculumBuilder({ courseId, locked }) {
               {sections.map((section, index) => (
                 <SortableSection
                   key={section.id}
+                  courseId={courseId}
                   section={section}
                   index={index}
                   disabled={locked}

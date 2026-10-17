@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\PaymentStatus;
+use Database\Factories\PaymentFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Payment extends Model
 {
-    /** @use HasFactory<\Database\Factories\PaymentFactory> */
+    /** @use HasFactory<PaymentFactory> */
     use HasFactory;
 
     /** Payments are created and updated only by PaymentService. */

@@ -3,13 +3,14 @@
 namespace Database\Factories;
 
 use App\Enums\LessonType;
+use App\Models\Lesson;
 use App\Models\Section;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * course_id is filled automatically from the section (see Lesson::booted()).
  *
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Lesson>
+ * @extends Factory<Lesson>
  */
 class LessonFactory extends Factory
 {

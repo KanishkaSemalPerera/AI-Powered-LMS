@@ -2,20 +2,23 @@
 
 use App\Http\Controllers\Api\V1\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Api\V1\Admin\CourseController as AdminCourseController;
+use App\Http\Controllers\Api\V1\AiController;
 use App\Http\Controllers\Api\V1\Auth\AuthController;
 use App\Http\Controllers\Api\V1\Auth\PasswordResetController;
 use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\CheckoutController;
-use App\Http\Controllers\Api\V1\EnrollmentController;
-use App\Http\Controllers\Api\V1\PaymentController;
-use App\Http\Controllers\Api\V1\StripeWebhookController;
 use App\Http\Controllers\Api\V1\CourseController;
+use App\Http\Controllers\Api\V1\EnrollmentController;
 use App\Http\Controllers\Api\V1\HealthController;
 use App\Http\Controllers\Api\V1\Instructor\CourseController as InstructorCourseController;
 use App\Http\Controllers\Api\V1\Instructor\CurriculumController;
+use App\Http\Controllers\Api\V1\Instructor\QuizController as InstructorQuizController;
 use App\Http\Controllers\Api\V1\LearnController;
 use App\Http\Controllers\Api\V1\LessonVideoController;
+use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\ProfileController;
+use App\Http\Controllers\Api\V1\QuizAttemptController;
+use App\Http\Controllers\Api\V1\StripeWebhookController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -76,7 +79,17 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
         Route::get('/lessons/{lesson}', [LearnController::class, 'lesson'])->name('lesson');
         Route::post('/lessons/{lesson}/complete', [LearnController::class, 'complete'])->name('complete');
         Route::delete('/lessons/{lesson}/complete', [LearnController::class, 'uncomplete'])->name('uncomplete');
+
+        Route::get('/lessons/{lesson}/quiz', [QuizAttemptController::class, 'show'])->name('quiz.show');
+        Route::get('/lessons/{lesson}/quiz/attempts', [QuizAttemptController::class, 'index'])->name('quiz.attempts.index');
+        Route::post('/lessons/{lesson}/quiz/attempts', [QuizAttemptController::class, 'store'])->middleware('throttle:quiz-attempts')->name('quiz.attempts.store');
+
+        // AI study assistant for this lesson
+        Route::post('/lessons/{lesson}/assistant', [AiController::class, 'ask'])->middleware('throttle:ai')->name('assistant');
     });
+
+    Route::get('/ai/usage', [AiController::class, 'usage'])->name('ai.usage');
+    Route::get('/quiz-attempts/{attempt}', [QuizAttemptController::class, 'showAttempt'])->name('quiz-attempts.show');
 
     // -------------------------------------------------------------- Student
     Route::middleware('role:student')->group(function () {
@@ -108,6 +121,17 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
         Route::delete('/lessons/{lesson}', [CurriculumController::class, 'destroyLesson'])->name('lessons.destroy');
         Route::post('/lessons/{lesson}/video', [CurriculumController::class, 'uploadVideo'])->name('lessons.video.store');
         Route::delete('/lessons/{lesson}/video', [CurriculumController::class, 'destroyVideo'])->name('lessons.video.destroy');
+
+        // Lesson quiz editor
+        Route::get('/lessons/{lesson}/quiz', [InstructorQuizController::class, 'show'])->name('lessons.quiz.show');
+        Route::put('/lessons/{lesson}/quiz', [InstructorQuizController::class, 'upsert'])->name('lessons.quiz.upsert');
+        Route::delete('/lessons/{lesson}/quiz', [InstructorQuizController::class, 'destroy'])->name('lessons.quiz.destroy');
+
+        // AI tools
+        Route::middleware('throttle:ai')->group(function () {
+            Route::post('/lessons/{lesson}/ai/quiz', [AiController::class, 'generateQuiz'])->name('ai.quiz');
+            Route::post('/ai/course-description', [AiController::class, 'courseDescription'])->name('ai.description');
+        });
     });
 
     // -------------------------------------------------------------- Admin

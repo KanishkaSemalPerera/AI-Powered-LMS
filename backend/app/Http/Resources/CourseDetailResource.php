@@ -2,13 +2,14 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Course;
 use Illuminate\Http\Request;
 
 /**
  * Full course page: summary fields plus description, outcomes, requirements,
  * curriculum outline, and (for the owner/admin) review workflow details.
  *
- * @mixin \App\Models\Course
+ * @mixin Course
  */
 class CourseDetailResource extends CourseResource
 {

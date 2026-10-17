@@ -1,7 +1,8 @@
-import { ChevronLeft, ChevronRight, CircleCheck, Circle } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Circle, CircleCheck, ListChecks } from 'lucide-react'
 import { Link } from 'react-router'
 import Markdown from '@/components/course/Markdown'
 import VideoPlayer from '@/components/course/VideoPlayer'
+import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import { buttonClasses } from '@/components/ui/buttonStyles'
 import { cn } from '@/utils/cn'
@@ -57,6 +58,30 @@ export default function LessonView({ course, data, canTrack, isCompleted, toggli
         </section>
       ) : (
         !isVideo && <p className="mt-6 text-slate-500">This lesson has no content yet.</p>
+      )}
+
+      {data.quiz && (
+        <section
+          aria-labelledby="quiz-card-title"
+          className="mt-8 flex flex-col gap-4 rounded-2xl border border-brand-200 bg-brand-50 p-5 sm:flex-row sm:items-center dark:border-brand-900 dark:bg-brand-950/40"
+        >
+          <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-brand-600 text-white">
+            <ListChecks className="size-5" aria-hidden="true" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <h2 id="quiz-card-title" className="font-semibold">
+              {data.quiz.title}
+            </h2>
+            <p className="mt-0.5 text-sm text-slate-600 dark:text-slate-400">
+              {data.quiz.questions_count} questions · pass mark {data.quiz.pass_mark}%
+              {data.quiz.best_score !== null && ` · best score ${data.quiz.best_score}%`}
+            </p>
+          </div>
+          {data.quiz.passed && <Badge variant="success">Passed</Badge>}
+          <Link to={`${learnPath(course, lesson.id)}/quiz`} className={buttonClasses({ variant: data.quiz.passed ? 'outline' : 'primary' })}>
+            {data.quiz.attempts > 0 ? 'Retake quiz' : 'Take the quiz'}
+          </Link>
+        </section>
       )}
 
       <nav aria-label="Lesson navigation" className="mt-10 flex items-center justify-between gap-3 border-t border-slate-200 pt-6 dark:border-slate-800">

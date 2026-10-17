@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Database\Factories\LessonProgressFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class LessonProgress extends Model
 {
-    /** @use HasFactory<\Database\Factories\LessonProgressFactory> */
+    /** @use HasFactory<LessonProgressFactory> */
     use HasFactory;
 
     protected $table = 'lesson_progress';

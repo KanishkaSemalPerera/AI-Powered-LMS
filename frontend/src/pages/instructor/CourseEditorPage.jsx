@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, CirclePlay, ExternalLink, ImagePlus, ListTree, Send, SquarePen } from 'lucide-react'
+import { ArrowLeft, CirclePlay, ExternalLink, ImagePlus, ListTree, Send, Sparkles, SquarePen } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
@@ -11,6 +11,7 @@ import * as instructorApi from '@/api/instructor'
 import CourseStatusBadge from '@/components/course/CourseStatusBadge'
 import CourseThumbnail from '@/components/course/CourseThumbnail'
 import CurriculumBuilder from '@/components/course/builder/CurriculumBuilder'
+import AiDescriptionModal from '@/components/course/AiDescriptionModal'
 import ListFieldEditor from '@/components/course/ListFieldEditor'
 import Alert from '@/components/ui/Alert'
 import Button from '@/components/ui/Button'
@@ -134,8 +135,31 @@ function CourseForm({ course, categories, disabled }) {
     handleSubmit,
     setError,
     reset,
+    setValue,
+    getValues,
     formState: { errors, isSubmitting, isDirty },
   } = useForm({ resolver: zodResolver(schema), defaultValues: toFormValues(course) })
+  const [aiOpen, setAiOpen] = useState(false)
+
+  /** Current form values the AI helper writes from. */
+  const aiContext = () => {
+    const values = getValues()
+    return {
+      title: values.title,
+      subtitle: values.subtitle || null,
+      level: values.level,
+      category: categories?.find((c) => String(c.id) === values.category_id)?.name ?? null,
+    }
+  }
+
+  /** Fills the form with the accepted AI suggestion (saved only when the instructor saves). */
+  const applySuggestion = ({ subtitle, description, what_you_will_learn }) => {
+    const options = { shouldDirty: true, shouldValidate: true }
+    setValue('subtitle', subtitle, options)
+    setValue('description', description, options)
+    setValue('what_you_will_learn', what_you_will_learn.map((value) => ({ value })), options)
+    toast.success('Suggestion applied. Review it, then save your changes.')
+  }
 
   const onSubmit = async (values) => {
     try {
@@ -186,6 +210,12 @@ function CourseForm({ course, categories, disabled }) {
               </FormField>
             </div>
 
+            <div className="flex justify-end">
+              <Button variant="outline" size="sm" onClick={() => setAiOpen(true)}>
+                <Sparkles className="size-4 text-brand-500" aria-hidden="true" />
+                Write with AI
+              </Button>
+            </div>
             <FormField
               label="Description"
               error={errors.description?.message}
@@ -224,6 +254,9 @@ function CourseForm({ course, categories, disabled }) {
             </div>
           </fieldset>
         </form>
+        {aiOpen && (
+          <AiDescriptionModal courseId={course?.id} context={aiContext} onApply={applySuggestion} onClose={() => setAiOpen(false)} />
+        )}
       </CardBody>
     </Card>
   )

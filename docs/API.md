@@ -94,7 +94,31 @@ Payment safety: the amount and currency charged by Stripe must match the recorde
 | DELETE | `/learn/{slug}/lessons/{id}/complete` | Mark not complete. A completed course stays completed |
 | GET | `/courses/{slug}/lessons/{id}/preview` | Public: a published course's free-preview lesson (404 otherwise) |
 
+### Quizzes — taking (enrolled students; owner/admin can view but not submit)
+
+| Method | URL | Description |
+|---|---|---|
+| GET | `/learn/{slug}/lessons/{id}/quiz` | Published quiz **without** `correct_option`/`explanation`, `can_submit`, and `summary: { attempts, best_score, passed }`. 404 for drafts |
+| POST | `/learn/{slug}/lessons/{id}/quiz/attempts` | `{ "answers": { "<questionId>": optionIndex } }` → scored server-side; returns `score_percent`, `passed`, and `review` (chosen/correct option + explanation per question). Unanswered = wrong. Passing marks the lesson complete. Rate limited (10/min) |
+| GET | `/learn/{slug}/lessons/{id}/quiz/attempts` | My attempt history (newest first, paginated) |
+| GET | `/quiz-attempts/{id}` | Review one of my attempts (404 for others' attempts) |
+
+`GET /learn/{slug}/lessons/{id}` includes `quiz: { id, title, pass_mark, questions_count, attempts, best_score, passed }` when the lesson has a published quiz; the curriculum marks lessons with `has_quiz`.
+
 Progress is `floor(completed / total lessons × 100)`. Resume order: last visited lesson → first incomplete lesson → first lesson.
+
+### AI features (Claude, called only from the backend)
+
+All AI endpoints are limited to `AI_RATE_LIMIT_PER_MINUTE` requests per minute per user (429) and `AI_RATE_LIMIT_PER_DAY` per day (429 with `errors.ai = ["daily_limit"]`). Every model call is logged in `ai_requests` (feature, model, input/output tokens, duration, status, error). AI errors use the standard envelope with `errors.ai` set to one of `not_configured`, `misconfigured`, `busy`, `timeout`, `unavailable`, `refused`, `invalid_output`, `bad_request`.
+
+| Method | URL | Role | Description |
+|---|---|---|---|
+| GET | `/ai/usage` | Auth | `{ configured, used_today, daily_limit, remaining_today }` |
+| POST | `/instructor/lessons/{id}/ai/quiz` | Instructor (owner) | `{ num_questions (1–15), difficulty: easy\|medium\|hard, source_text? (100–30000 chars; defaults to the lesson content), replace? }` → saves and returns a **draft** quiz (`is_ai_generated: true`). 409 if a quiz exists and `replace` is not true |
+| POST | `/instructor/ai/course-description` | Instructor | `{ title, subtitle?, category?, level?, notes?, tone?: friendly\|professional\|enthusiastic\|concise, course_id? }` → `{ subtitle, description, what_you_will_learn[] }` (nothing is saved) |
+| POST | `/learn/{slug}/lessons/{id}/assistant` | Enrolled student (owner/admin preview) | `{ question, history?: [{ role: user\|assistant, content }] }` → `{ answer (Markdown), usage }`. The lesson content is sent to Claude as context |
+
+The quiz generator requests strict JSON (structured outputs) and the backend still validates it (question/option counts, correct index in range, distinct options) before saving.
 
 ### Instructor — role `instructor`, own courses only
 
@@ -123,6 +147,9 @@ Progress is `floor(completed / total lessons × 100)`. Resume order: last visite
 | DELETE | `/instructor/lessons/{id}` | Delete lesson and its video |
 | POST | `/instructor/lessons/{id}/video` | Upload video (`multipart/form-data`: `video` mp4/webm/mov ≤ 500 MB, optional `duration_seconds`) |
 | DELETE | `/instructor/lessons/{id}/video` | Remove the uploaded video |
+| GET | `/instructor/lessons/{id}/quiz` | `{ lesson, quiz }` — quiz with answer key, or `null` |
+| PUT | `/instructor/lessons/{id}/quiz` | Create/replace the quiz: `{ title, description?, pass_mark (1–100), status: draft\|published, questions: [{ question, options: [2–6 distinct], correct_option, explanation? }] }`. Publishing needs ≥ 1 question |
+| DELETE | `/instructor/lessons/{id}/quiz` | Delete the quiz and its attempts |
 
 ### Lesson video playback
 

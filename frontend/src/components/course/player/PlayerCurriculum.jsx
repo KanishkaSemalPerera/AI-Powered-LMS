@@ -1,4 +1,4 @@
-import { CircleCheck, CirclePlay, FileText } from 'lucide-react'
+import { CircleCheck, CirclePlay, FileText, ListChecks } from 'lucide-react'
 import { Link } from 'react-router'
 import { cn } from '@/utils/cn'
 import { formatDuration } from '@/utils/format'
@@ -43,6 +43,7 @@ export default function PlayerCurriculum({ course, sections, currentLessonId, on
                         <TypeIcon className="mt-0.5 size-4 shrink-0 text-slate-400" aria-hidden="true" />
                       )}
                       <span className="flex-1">{lesson.title}</span>
+                      {lesson.has_quiz && <ListChecks className="mt-0.5 size-3.5 shrink-0 text-brand-500" aria-label="Has a quiz" />}
                       <span className="shrink-0 text-xs text-slate-400">{formatDuration(lesson.duration_seconds)}</span>
                     </Link>
                   </li>

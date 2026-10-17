@@ -2,6 +2,8 @@
 
 namespace App\Contracts;
 
+use App\Exceptions\InvalidWebhookException;
+
 /**
  * The small slice of a payment provider the LMS needs. The Stripe
  * implementation is App\Services\Payments\StripeGateway; tests can bind a fake.
@@ -27,7 +29,7 @@ interface PaymentGateway
      *
      * @return array{id: string, type: string, object: array}
      *
-     * @throws \App\Exceptions\InvalidWebhookException
+     * @throws InvalidWebhookException
      */
     public function parseWebhookEvent(string $payload, ?string $signature): array;
 }

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Courses;
 
+use App\Models\Category;
 use App\Models\Course;
 use App\Models\Lesson;
 use App\Models\Section;
@@ -197,7 +198,7 @@ class CurriculumTest extends TestCase
 
     public function test_submit_for_review_reports_empty_lessons(): void
     {
-        $this->course->update(['category_id' => \App\Models\Category::factory()->create()->id, 'description' => str_repeat('Detailed description. ', 8)]);
+        $this->course->update(['category_id' => Category::factory()->create()->id, 'description' => str_repeat('Detailed description. ', 8)]);
         $section = Section::factory()->for($this->course)->create();
         Lesson::factory()->for($section)->create(['title' => 'Empty text lesson', 'type' => 'text', 'content' => '  ']);
         Lesson::factory()->for($section)->create(['title' => 'Video without source', 'type' => 'video', 'video_url' => null]);
