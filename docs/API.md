@@ -61,6 +61,38 @@ Roles: **Public** = no token · **Auth** = any signed-in active user.
 | DELETE | `/profile/avatar` | Auth | Remove avatar |
 | PUT | `/profile/password` | Auth | Change password (`current_password`, `password`, `password_confirmation`); signs out other devices |
 
+### Catalogue
+
+| Method | URL | Role | Description |
+|---|---|---|---|
+| GET | `/categories` | Public | Categories with published course counts (`per_page` ≤ 100) |
+| GET | `/courses` | Public | Published courses. Query: `q`, `category` (slug), `level`, `price` (`free`/`paid`), `min_rating`, `featured`, `sort` (`newest`, `popular`, `rating`, `price_asc`, `price_desc`, `title`), `page`, `per_page` (≤ 50) |
+| GET | `/courses/{slug}` | Public* | Course detail with curriculum outline (no lesson content). *Drafts return 404 except to the owner or an admin sending a Bearer token |
+
+### Instructor — role `instructor`, own courses only
+
+| Method | URL | Description |
+|---|---|---|
+| GET | `/instructor/courses` | My courses. Query: `q`, `status`, `page`, `per_page` |
+| POST | `/instructor/courses` | Create a draft (only `title` required) |
+| GET | `/instructor/courses/{id}` | One of my courses with curriculum |
+| PUT | `/instructor/courses/{id}` | Update details (blocked while pending review; editing a rejected course returns it to draft) |
+| DELETE | `/instructor/courses/{id}` | Delete a draft/rejected course with no students |
+| POST | `/instructor/courses/{id}/thumbnail` | Upload thumbnail (`multipart/form-data`, field `thumbnail`: jpg/png/webp, ≤ 4 MB, ≥ 640×360) |
+| POST | `/instructor/courses/{id}/submit` | Submit for review. 422 lists what is missing: `category_id`, `description` (≥ 100 chars), `lessons` (≥ 1) |
+
+### Admin — role `admin`
+
+| Method | URL | Description |
+|---|---|---|
+| GET | `/admin/courses` | All courses. Query: `status` (pending = oldest first), `q`, `page`, `per_page` |
+| POST | `/admin/courses/{id}/approve` | Publish a pending course |
+| POST | `/admin/courses/{id}/reject` | Reject a pending course: `{ "reason": "≥ 10 chars" }` |
+| GET | `/admin/categories` | Categories with counts |
+| POST | `/admin/categories` | Create: `{ name, description?, icon? }` |
+| PUT | `/admin/categories/{id}` | Update (renaming regenerates the slug) |
+| DELETE | `/admin/categories/{id}` | Delete; its courses become uncategorised |
+
 ## Request examples
 
 **Register** `POST /auth/register`

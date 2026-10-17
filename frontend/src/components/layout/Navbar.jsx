@@ -23,7 +23,10 @@ export default function Navbar() {
   const [open, setOpen] = useState(false)
   const { status, user } = useAuth()
 
-  const links = [{ to: '/', label: 'Home', end: true }]
+  const links = [
+    { to: '/', label: 'Home', end: true },
+    { to: '/courses', label: 'Courses' },
+  ]
   if (user) links.push({ to: dashboardPath(user.role), label: 'Dashboard', end: true })
 
   return (
