@@ -23,6 +23,7 @@ class CurriculumService
         return $course->load([
             'sections' => fn ($q) => $q->orderBy('position'),
             'sections.lessons' => fn ($q) => $q->orderBy('position'),
+            'sections.lessons.quiz' => fn ($q) => $q->withCount('questions'),
         ]);
     }
 

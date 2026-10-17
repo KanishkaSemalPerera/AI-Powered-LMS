@@ -59,6 +59,7 @@ export const router = createBrowserRouter([
           // (enrolled students; owners and admins in preview mode).
           { path: 'learn/:slug', lazy: page(() => import('@/pages/student/CoursePlayerPage')) },
           { path: 'learn/:slug/lessons/:lessonId', lazy: page(() => import('@/pages/student/CoursePlayerPage')) },
+          { path: 'learn/:slug/lessons/:lessonId/quiz', lazy: page(() => import('@/pages/student/QuizPage')) },
           {
             element: <DashboardLayout />,
             children: [
@@ -79,6 +80,7 @@ export const router = createBrowserRouter([
                   { path: 'courses', lazy: page(() => import('@/pages/instructor/InstructorCoursesPage')) },
                   { path: 'courses/new', lazy: page(() => import('@/pages/instructor/CourseEditorPage')) },
                   { path: 'courses/:id/edit', lazy: page(() => import('@/pages/instructor/CourseEditorPage')) },
+                  { path: 'courses/:courseId/lessons/:lessonId/quiz', lazy: page(() => import('@/pages/instructor/QuizEditorPage')) },
                 ],
               },
               {

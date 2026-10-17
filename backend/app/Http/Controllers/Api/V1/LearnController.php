@@ -10,6 +10,7 @@ use App\Models\Lesson;
 use App\Models\User;
 use App\Services\CurriculumService;
 use App\Services\ProgressService;
+use App\Services\QuizService;
 use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -25,6 +26,7 @@ class LearnController extends Controller
     public function __construct(
         private readonly ProgressService $progress,
         private readonly CurriculumService $curriculum,
+        private readonly QuizService $quizzes,
     ) {}
 
     /** GET /learn/{slug} — curriculum with completion state and the lesson to resume. */
@@ -54,6 +56,7 @@ class LearnController extends Controller
                     'title' => $lesson->title,
                     'type' => $lesson->type->value,
                     'duration_seconds' => $lesson->duration_seconds,
+                    'has_quiz' => (bool) $lesson->quiz?->isPublished(),
                     'is_completed' => in_array($lesson->id, $completed, true),
                 ])->values(),
             ])->values(),
@@ -75,8 +78,18 @@ class LearnController extends Controller
         $ordered = $this->progress->orderedLessons($course)->pluck('id')->values();
         $index = $ordered->search($lesson->id);
 
+        // Only published quizzes are shown to learners, without the answer key.
+        $quiz = $lesson->quiz()->withCount('questions')->first();
+        $quiz = $quiz?->isPublished() ? $quiz : null;
+
         return ApiResponse::success([
-            'lesson' => new LessonResource($lesson),
+            'lesson' => (new LessonResource($lesson))->resolve($request),
+            'quiz' => $quiz ? array_merge([
+                'id' => $quiz->id,
+                'title' => $quiz->title,
+                'pass_mark' => $quiz->pass_mark,
+                'questions_count' => $quiz->questions_count,
+            ], $this->quizzes->summaryFor($request->user(), $quiz)) : null,
             'is_completed' => $enrollment
                 ? $enrollment->lessonProgress()->where('lesson_id', $lesson->id)->exists()
                 : false,

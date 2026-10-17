@@ -13,6 +13,8 @@ use App\Http\Controllers\Api\V1\CourseController;
 use App\Http\Controllers\Api\V1\HealthController;
 use App\Http\Controllers\Api\V1\Instructor\CourseController as InstructorCourseController;
 use App\Http\Controllers\Api\V1\Instructor\CurriculumController;
+use App\Http\Controllers\Api\V1\Instructor\QuizController as InstructorQuizController;
+use App\Http\Controllers\Api\V1\QuizAttemptController;
 use App\Http\Controllers\Api\V1\LearnController;
 use App\Http\Controllers\Api\V1\LessonVideoController;
 use App\Http\Controllers\Api\V1\ProfileController;
@@ -76,7 +78,12 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
         Route::get('/lessons/{lesson}', [LearnController::class, 'lesson'])->name('lesson');
         Route::post('/lessons/{lesson}/complete', [LearnController::class, 'complete'])->name('complete');
         Route::delete('/lessons/{lesson}/complete', [LearnController::class, 'uncomplete'])->name('uncomplete');
+
+        Route::get('/lessons/{lesson}/quiz', [QuizAttemptController::class, 'show'])->name('quiz.show');
+        Route::get('/lessons/{lesson}/quiz/attempts', [QuizAttemptController::class, 'index'])->name('quiz.attempts.index');
+        Route::post('/lessons/{lesson}/quiz/attempts', [QuizAttemptController::class, 'store'])->middleware('throttle:quiz-attempts')->name('quiz.attempts.store');
     });
+    Route::get('/quiz-attempts/{attempt}', [QuizAttemptController::class, 'showAttempt'])->name('quiz-attempts.show');
 
     // -------------------------------------------------------------- Student
     Route::middleware('role:student')->group(function () {
@@ -108,6 +115,11 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
         Route::delete('/lessons/{lesson}', [CurriculumController::class, 'destroyLesson'])->name('lessons.destroy');
         Route::post('/lessons/{lesson}/video', [CurriculumController::class, 'uploadVideo'])->name('lessons.video.store');
         Route::delete('/lessons/{lesson}/video', [CurriculumController::class, 'destroyVideo'])->name('lessons.video.destroy');
+
+        // Lesson quiz editor
+        Route::get('/lessons/{lesson}/quiz', [InstructorQuizController::class, 'show'])->name('lessons.quiz.show');
+        Route::put('/lessons/{lesson}/quiz', [InstructorQuizController::class, 'upsert'])->name('lessons.quiz.upsert');
+        Route::delete('/lessons/{lesson}/quiz', [InstructorQuizController::class, 'destroy'])->name('lessons.quiz.destroy');
     });
 
     // -------------------------------------------------------------- Admin

@@ -73,6 +73,11 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(5)->by($request->ip());
         });
 
+        // Discourages brute-forcing answers by rapid resubmission.
+        RateLimiter::for('quiz-attempts', function (Request $request) {
+            return Limit::perMinute(10)->by($request->user()?->id ?: $request->ip());
+        });
+
         // Each checkout creates a Stripe session; stop accidental or abusive loops.
         RateLimiter::for('checkout', function (Request $request) {
             return Limit::perMinute(10)->by($request->user()?->id ?: $request->ip());

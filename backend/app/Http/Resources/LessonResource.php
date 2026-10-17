@@ -31,6 +31,13 @@ class LessonResource extends JsonResource
             'duration_seconds' => $this->duration_seconds,
             'is_preview' => $this->is_preview,
             'position' => $this->position,
+            // Builder badge: draft/published quiz and its size.
+            'quiz' => $this->whenLoaded('quiz', fn () => $this->quiz ? [
+                'id' => $this->quiz->id,
+                'status' => $this->quiz->status->value,
+                'questions_count' => $this->quiz->questions_count ?? $this->quiz->questions()->count(),
+                'is_ai_generated' => $this->quiz->is_ai_generated,
+            ] : null),
         ];
     }
 }
