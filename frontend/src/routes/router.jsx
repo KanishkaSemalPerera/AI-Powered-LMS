@@ -24,6 +24,8 @@ export const router = createBrowserRouter([
         element: <MainLayout />,
         children: [
           { index: true, element: <HomePage /> },
+          { path: 'courses', lazy: page(() => import('@/pages/public/CoursesPage')) },
+          { path: 'courses/:slug', lazy: page(() => import('@/pages/public/CourseDetailPage')) },
           { path: 'forbidden', lazy: page(() => import('@/pages/public/ForbiddenPage')) },
         ],
       },
@@ -59,12 +61,21 @@ export const router = createBrowserRouter([
               {
                 path: 'instructor',
                 element: <ProtectedRoute roles={[ROLES.INSTRUCTOR]} />,
-                children: [{ index: true, lazy: page(() => import('@/pages/instructor/InstructorDashboardPage')) }],
+                children: [
+                  { index: true, lazy: page(() => import('@/pages/instructor/InstructorDashboardPage')) },
+                  { path: 'courses', lazy: page(() => import('@/pages/instructor/InstructorCoursesPage')) },
+                  { path: 'courses/new', lazy: page(() => import('@/pages/instructor/CourseEditorPage')) },
+                  { path: 'courses/:id/edit', lazy: page(() => import('@/pages/instructor/CourseEditorPage')) },
+                ],
               },
               {
                 path: 'admin',
                 element: <ProtectedRoute roles={[ROLES.ADMIN]} />,
-                children: [{ index: true, lazy: page(() => import('@/pages/admin/AdminDashboardPage')) }],
+                children: [
+                  { index: true, lazy: page(() => import('@/pages/admin/AdminDashboardPage')) },
+                  { path: 'courses', lazy: page(() => import('@/pages/admin/AdminCourseApprovalsPage')) },
+                  { path: 'categories', lazy: page(() => import('@/pages/admin/AdminCategoriesPage')) },
+                ],
               },
             ],
           },
