@@ -49,7 +49,7 @@ class DemoActivitySeeder extends Seeder
         $this->random = new Randomizer(new Mt19937(2026));
 
         $students = User::where('email', 'like', 'student%@lms.test')->orderBy('id')->get();
-        $courses = Course::published()->with('sections.lessons.quiz.questions')->orderBy('id')->get()->keyBy('title');
+        $courses = Course::published()->with(['instructor', 'sections.lessons.quiz.questions'])->orderBy('id')->get()->keyBy('title');
 
         // Emma (student1) is the showcase account: one finished course with a
         // certificate, one paid course in progress, and one just started.

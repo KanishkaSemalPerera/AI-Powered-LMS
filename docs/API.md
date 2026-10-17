@@ -1,0 +1,99 @@
+# LearnHub API Reference
+
+Base URL: `http://localhost:8000/api/v1`
+
+## Conventions
+
+**Authentication** — send the token from login/register on every protected request:
+
+```
+Authorization: Bearer <token>
+Accept: application/json
+```
+
+**Response envelope** — every response, success or error:
+
+```json
+{ "success": true, "message": "Logged in successfully.", "data": { }, "errors": null, "meta": null }
+```
+
+| Status | Meaning | `errors` |
+|---|---|---|
+| 200 / 201 | Success / created | `null` |
+| 401 | Missing, invalid or expired token | `null` |
+| 403 | Wrong role, not the owner, or account deactivated (`errors.account`) | `null` or `{ "account": ["deactivated"] }` |
+| 404 | Resource or route not found | `null` |
+| 422 | Validation failed | `{ "field": ["message", ...] }` |
+| 429 | Rate limit exceeded (`data.retry_after` seconds) | `null` |
+| 500 | Server error (details hidden unless `APP_DEBUG=true`) | `null` |
+
+List endpoints return pagination in `meta`: `current_page, last_page, per_page, total, from, to`.
+
+**Rate limits**: 120 requests/min per user or IP on all routes; login 5/min per email+IP (20/min per IP); register 10/hour per IP; forgot/reset password 5/min per IP.
+
+## Endpoints
+
+Roles: **Public** = no token · **Auth** = any signed-in active user.
+
+### System
+
+| Method | URL | Role | Description |
+|---|---|---|---|
+| GET | `/health` | Public | API and database status (503 if the database is down) |
+
+### Auth
+
+| Method | URL | Role | Description |
+|---|---|---|---|
+| POST | `/auth/register` | Public | Create a student or instructor account; returns user + token |
+| POST | `/auth/login` | Public | Log in; returns user + token |
+| POST | `/auth/forgot-password` | Public | Email a reset link (same response whether or not the email exists) |
+| POST | `/auth/reset-password` | Public | Set a new password with the emailed token; signs out all devices |
+| POST | `/auth/logout` | Auth | Revoke the current token |
+| GET | `/auth/me` | Auth | Current user |
+
+### Profile
+
+| Method | URL | Role | Description |
+|---|---|---|---|
+| PUT | `/profile` | Auth | Update name, email, headline, bio |
+| POST | `/profile/avatar` | Auth | Upload avatar (`multipart/form-data`, field `avatar`: jpg/png/webp, ≤ 2 MB, 64–4000 px) |
+| DELETE | `/profile/avatar` | Auth | Remove avatar |
+| PUT | `/profile/password` | Auth | Change password (`current_password`, `password`, `password_confirmation`); signs out other devices |
+
+## Request examples
+
+**Register** `POST /auth/register`
+
+```json
+{
+  "name": "Jane Learner",
+  "email": "jane@example.com",
+  "password": "secret123",
+  "password_confirmation": "secret123",
+  "role": "student"
+}
+```
+
+`role` is `student` or `instructor`. Passwords need at least 8 characters with a letter and a number (production also requires mixed case and rejects breached passwords).
+
+**Login** `POST /auth/login` → `200 OK` (register returns the same shape with `201 Created`)
+
+```json
+{
+  "success": true,
+  "message": "Logged in successfully.",
+  "data": {
+    "user": { "id": 5, "name": "Emma Wilson", "role": "student", "role_label": "Student", "email": "student1@lms.test", "avatar_url": null },
+    "token": "12|Xyz...",
+    "token_type": "Bearer",
+    "expires_at": "2026-10-24T18:00:00+00:00"
+  },
+  "errors": null,
+  "meta": null
+}
+```
+
+## Postman
+
+Import [`postman/LearnHub.postman_collection.json`](postman/LearnHub.postman_collection.json). Running **Auth → Login** stores the token in the collection variable `token`, which every protected request uses automatically.

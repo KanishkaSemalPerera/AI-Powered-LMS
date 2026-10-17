@@ -1,12 +1,15 @@
 import { Menu, X } from 'lucide-react'
 import { useState } from 'react'
-import { NavLink } from 'react-router'
+import { Link, NavLink } from 'react-router'
 import Button from '@/components/ui/Button'
+import { buttonClasses } from '@/components/ui/buttonStyles'
+import Skeleton from '@/components/ui/Skeleton'
+import { useAuth } from '@/hooks/useAuth'
 import { cn } from '@/utils/cn'
+import { dashboardPath } from '@/utils/roles'
 import Logo from './Logo'
 import ThemeToggle from './ThemeToggle'
-
-const links = [{ to: '/', label: 'Home', end: true }]
+import UserMenu from './UserMenu'
 
 const linkClass = ({ isActive }) =>
   cn(
@@ -18,10 +21,14 @@ const linkClass = ({ isActive }) =>
 
 export default function Navbar() {
   const [open, setOpen] = useState(false)
+  const { status, user } = useAuth()
+
+  const links = [{ to: '/', label: 'Home', end: true }]
+  if (user) links.push({ to: dashboardPath(user.role), label: 'Dashboard', end: true })
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/80 backdrop-blur dark:border-slate-800 dark:bg-slate-950/80">
-      <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8" aria-label="Main">
+      <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8" aria-label="Main">
         <Logo />
 
         <div className="hidden items-center gap-1 md:flex">
@@ -32,8 +39,22 @@ export default function Navbar() {
           ))}
         </div>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 sm:gap-2">
           <ThemeToggle />
+
+          {status === 'loading' && <Skeleton className="size-8 rounded-full" />}
+          {status === 'authenticated' && <UserMenu />}
+          {(status === 'guest' || status === 'error') && (
+            <div className="hidden items-center gap-2 sm:flex">
+              <Link to="/login" className={buttonClasses({ variant: 'ghost', size: 'sm' })}>
+                Log in
+              </Link>
+              <Link to="/register" className={buttonClasses({ size: 'sm' })}>
+                Sign up
+              </Link>
+            </div>
+          )}
+
           <Button
             variant="ghost"
             size="icon"
@@ -52,16 +73,20 @@ export default function Navbar() {
         <div id="mobile-menu" className="border-t border-slate-200 px-4 py-3 md:hidden dark:border-slate-800">
           <div className="flex flex-col gap-1">
             {links.map((link) => (
-              <NavLink
-                key={link.to}
-                to={link.to}
-                end={link.end}
-                className={linkClass}
-                onClick={() => setOpen(false)}
-              >
+              <NavLink key={link.to} to={link.to} end={link.end} className={linkClass} onClick={() => setOpen(false)}>
                 {link.label}
               </NavLink>
             ))}
+            {status !== 'authenticated' && (
+              <div className="mt-2 grid grid-cols-2 gap-2 sm:hidden">
+                <Link to="/login" className={buttonClasses({ variant: 'outline', size: 'sm' })} onClick={() => setOpen(false)}>
+                  Log in
+                </Link>
+                <Link to="/register" className={buttonClasses({ size: 'sm' })} onClick={() => setOpen(false)}>
+                  Sign up
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       )}
