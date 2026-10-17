@@ -5,6 +5,10 @@ use App\Http\Controllers\Api\V1\Admin\CourseController as AdminCourseController;
 use App\Http\Controllers\Api\V1\Auth\AuthController;
 use App\Http\Controllers\Api\V1\Auth\PasswordResetController;
 use App\Http\Controllers\Api\V1\CategoryController;
+use App\Http\Controllers\Api\V1\CheckoutController;
+use App\Http\Controllers\Api\V1\EnrollmentController;
+use App\Http\Controllers\Api\V1\PaymentController;
+use App\Http\Controllers\Api\V1\StripeWebhookController;
 use App\Http\Controllers\Api\V1\CourseController;
 use App\Http\Controllers\Api\V1\HealthController;
 use App\Http\Controllers\Api\V1\Instructor\CourseController as InstructorCourseController;
@@ -36,6 +40,9 @@ Route::get('/courses/{course:slug}', [CourseController::class, 'show'])->name('c
 // Uploaded lesson video playback. Access is granted by the temporary URL signature.
 Route::get('/lessons/{lesson}/video', LessonVideoController::class)->middleware('signed')->name('lessons.video');
 
+// Stripe webhook: authenticated by its signature, and exempt from the per-IP API rate limit.
+Route::post('/webhooks/stripe', StripeWebhookController::class)->withoutMiddleware('throttle:api')->name('webhooks.stripe');
+
 // ------------------------------------------------------------------ Auth
 Route::prefix('auth')->name('auth.')->group(function () {
     Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:register')->name('register');
@@ -56,6 +63,16 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
         Route::post('/avatar', [ProfileController::class, 'updateAvatar'])->name('avatar.update');
         Route::delete('/avatar', [ProfileController::class, 'destroyAvatar'])->name('avatar.destroy');
         Route::put('/password', [ProfileController::class, 'changePassword'])->name('password');
+    });
+
+    Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
+
+    // -------------------------------------------------------------- Student
+    Route::middleware('role:student')->group(function () {
+        Route::post('/courses/{course}/enroll', [EnrollmentController::class, 'store'])->name('courses.enroll');
+        Route::post('/courses/{course}/checkout', [CheckoutController::class, 'store'])->middleware('throttle:checkout')->name('courses.checkout');
+        Route::post('/checkout/confirm', [CheckoutController::class, 'confirm'])->name('checkout.confirm');
+        Route::get('/my/courses', [EnrollmentController::class, 'index'])->name('my.courses');
     });
 
     // -------------------------------------------------------------- Instructor

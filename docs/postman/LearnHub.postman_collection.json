@@ -50,6 +50,10 @@
     {
       "key": "lessonId",
       "value": "1"
+    },
+    {
+      "key": "sessionId",
+      "value": ""
     }
   ],
   "event": [
@@ -719,6 +723,67 @@
           "request": {
             "method": "DELETE",
             "url": "{{baseUrl}}/instructor/sections/{{sectionId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Student enrollment & payments (log in as a student)",
+      "item": [
+        {
+          "name": "Enroll in free course",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/courses/{{courseId}}/enroll"
+          }
+        },
+        {
+          "name": "Start checkout (paid course)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const b=pm.response.json(); if(b.success){pm.collectionVariables.set(\"sessionId\", b.data.session_id); console.log(\"Open in browser:\", b.data.checkout_url);}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/courses/{{courseId}}/checkout"
+          }
+        },
+        {
+          "name": "Confirm checkout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/checkout/confirm",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"session_id\": \"{{sessionId}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "My courses",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/my/courses?status=&page=1"
+          }
+        },
+        {
+          "name": "Payment history",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/payments"
           }
         }
       ]

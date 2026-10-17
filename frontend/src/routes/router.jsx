@@ -27,6 +27,11 @@ export const router = createBrowserRouter([
           { path: 'courses', lazy: page(() => import('@/pages/public/CoursesPage')) },
           { path: 'courses/:slug', lazy: page(() => import('@/pages/public/CourseDetailPage')) },
           { path: 'forbidden', lazy: page(() => import('@/pages/public/ForbiddenPage')) },
+          { path: 'checkout/cancel', lazy: page(() => import('@/pages/public/CheckoutCancelPage')) },
+          {
+            element: <ProtectedRoute roles={[ROLES.STUDENT]} />,
+            children: [{ path: 'checkout/success', lazy: page(() => import('@/pages/public/CheckoutSuccessPage')) }],
+          },
         ],
       },
 
@@ -56,7 +61,11 @@ export const router = createBrowserRouter([
               { path: 'profile', lazy: page(() => import('@/pages/auth/ProfilePage')) },
               {
                 element: <ProtectedRoute roles={[ROLES.STUDENT]} />,
-                children: [{ path: 'dashboard', lazy: page(() => import('@/pages/student/StudentDashboardPage')) }],
+                children: [
+                  { path: 'dashboard', lazy: page(() => import('@/pages/student/StudentDashboardPage')) },
+                  { path: 'my-courses', lazy: page(() => import('@/pages/student/MyCoursesPage')) },
+                  { path: 'payments', lazy: page(() => import('@/pages/student/PaymentsPage')) },
+                ],
               },
               {
                 path: 'instructor',

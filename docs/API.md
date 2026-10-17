@@ -69,6 +69,21 @@ Roles: **Public** = no token · **Auth** = any signed-in active user.
 | GET | `/courses` | Public | Published courses. Query: `q`, `category` (slug), `level`, `price` (`free`/`paid`), `min_rating`, `featured`, `sort` (`newest`, `popular`, `rating`, `price_asc`, `price_desc`, `title`), `page`, `per_page` (≤ 50) |
 | GET | `/courses/{slug}` | Public* | Course detail with curriculum outline (no lesson content). *Drafts return 404 except to the owner or an admin sending a Bearer token |
 
+### Enrollment & payments
+
+| Method | URL | Role | Description |
+|---|---|---|---|
+| POST | `/courses/{id}/enroll` | Student | Enroll in a free published course. 402 for paid courses, 409 if already enrolled |
+| POST | `/courses/{id}/checkout` | Student | Start Stripe Checkout for a paid course → `{ checkout_url, session_id }`. 503 if Stripe isn't configured. Rate limited (10/min) |
+| POST | `/checkout/confirm` | Student | `{ session_id }` from the success redirect. Confirms with Stripe and grants access if paid (idempotent, owner only) |
+| GET | `/my/courses` | Student | My enrollments with course and progress. Query: `status` (`in_progress`/`completed`), `page`, `per_page` |
+| GET | `/payments` | Auth | My payment history (abandoned checkouts excluded) |
+| POST | `/webhooks/stripe` | Stripe | Signed with `Stripe-Signature` (400 if invalid or older than 5 min). Handles `checkout.session.completed`, `checkout.session.async_payment_succeeded/failed`, `checkout.session.expired`, `charge.refunded` (revokes access) |
+
+`GET /courses/{slug}` with a student's token also returns `enrollment: { progress_percent, last_lesson_id, completed_at }` (or `null`).
+
+Payment safety: the amount and currency charged by Stripe must match the recorded payment or it is marked `failed`; fulfilment locks the payment row so the webhook and the success page can run at the same time without double enrollment.
+
 ### Instructor — role `instructor`, own courses only
 
 | Method | URL | Description |

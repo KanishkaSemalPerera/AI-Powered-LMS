@@ -1,15 +1,14 @@
 import { useQuery } from '@tanstack/react-query'
-import { Check, Clock, Globe, Layers, Pencil, Signal, Users } from 'lucide-react'
-import { Link, useLocation, useParams } from 'react-router'
+import { Check, Clock, Globe, Layers, Signal, Users } from 'lucide-react'
+import { Link, useParams } from 'react-router'
 import { getCourse } from '@/api/courses'
 import CourseStatusBadge from '@/components/course/CourseStatusBadge'
 import CourseThumbnail from '@/components/course/CourseThumbnail'
 import CurriculumList from '@/components/course/CurriculumList'
+import EnrollPanel from '@/components/course/EnrollPanel'
 import Alert from '@/components/ui/Alert'
 import Avatar from '@/components/ui/Avatar'
 import Badge from '@/components/ui/Badge'
-import Button from '@/components/ui/Button'
-import { buttonClasses } from '@/components/ui/buttonStyles'
 import ErrorState from '@/components/ui/ErrorState'
 import Skeleton from '@/components/ui/Skeleton'
 import StarRating from '@/components/ui/StarRating'
@@ -17,7 +16,6 @@ import { useAuth } from '@/hooks/useAuth'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import NotFoundPage from '@/pages/public/NotFoundPage'
 import { formatDate, formatDuration, formatNumber, formatPrice, plural } from '@/utils/format'
-import { ROLES } from '@/utils/roles'
 
 function DetailSkeleton() {
   return (
@@ -37,46 +35,13 @@ function DetailSkeleton() {
   )
 }
 
-/** Call to action in the price card, depending on who is viewing. */
-function EnrollPanel({ course }) {
-  const { user } = useAuth()
-  const location = useLocation()
-
-  if (course.can_manage && user?.role === ROLES.INSTRUCTOR) {
-    return (
-      <Link to={`/instructor/courses/${course.id}/edit`} className={buttonClasses({ size: 'lg', className: 'w-full' })}>
-        <Pencil className="size-4" aria-hidden="true" />
-        Edit this course
-      </Link>
-    )
-  }
-
-  if (!user) {
-    return (
-      <Link to="/login" state={{ from: location }} className={buttonClasses({ size: 'lg', className: 'w-full' })}>
-        Log in to enroll
-      </Link>
-    )
-  }
-
-  if (user.role !== ROLES.STUDENT) {
-    return <p className="text-sm text-slate-500 dark:text-slate-400">Enrollment is available to student accounts.</p>
-  }
-
-  return (
-    <div className="space-y-2">
-      <Button size="lg" className="w-full" disabled>
-        {course.is_free ? 'Enroll for free' : 'Buy now'}
-      </Button>
-      <p className="text-center text-xs text-slate-500 dark:text-slate-400">Enrollment is opening soon.</p>
-    </div>
-  )
-}
-
 export default function CourseDetailPage() {
   const { slug } = useParams()
+  // The response depends on who is viewing (enrollment, owner preview), so the
+  // viewer is part of the cache key: logging in or out never shows stale data.
+  const { user } = useAuth()
   const { data: course, error, isPending, refetch } = useQuery({
-    queryKey: ['course', slug],
+    queryKey: ['course', slug, user?.id ?? 'guest'],
     queryFn: () => getCourse(slug),
   })
 

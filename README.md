@@ -64,6 +64,26 @@ Every demo account uses the password **`password`**.
 
 Tests run on an in-memory SQLite database (`phpunit.xml`), so `php artisan test` never touches `lms_db`.
 
+## Stripe payments (test mode)
+
+Free courses work without any setup. To sell paid courses locally:
+
+1. Create a free Stripe account and copy your **test** keys from https://dashboard.stripe.com/test/apikeys into `backend\.env`:
+   ```
+   STRIPE_KEY=pk_test_...
+   STRIPE_SECRET=sk_test_...
+   ```
+2. Install the Stripe CLI (PowerShell): `winget install Stripe.StripeCli`, then run `stripe login`.
+3. Forward webhooks to the API (leave this running in its own terminal):
+   ```powershell
+   stripe listen --forward-to http://localhost:8000/api/v1/webhooks/stripe
+   ```
+   Copy the `whsec_...` secret it prints into `STRIPE_WEBHOOK_SECRET` in `backend\.env`.
+4. Restart `php artisan serve`, open a paid course as a student, click **Buy now** and pay with the test card
+   `4242 4242 4242 4242` (any future expiry date, any CVC, any postcode).
+
+Even without step 3, the checkout success page confirms the payment directly with Stripe, so the student is still enrolled.
+
 ## Branching (Git Flow)
 
 `main` (releases) ← `release/*` ← `Develop` ← `feature/*`; urgent fixes use `hotfix/*` from `main`.

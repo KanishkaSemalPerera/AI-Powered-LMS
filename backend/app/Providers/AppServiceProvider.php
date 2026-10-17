@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Contracts\PaymentGateway;
+use App\Services\Payments\StripeGateway;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
@@ -16,7 +18,8 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        //
+        // Swap the payment provider (or a fake in tests) by rebinding this interface.
+        $this->app->bind(PaymentGateway::class, StripeGateway::class);
     }
 
     public function boot(): void
@@ -68,6 +71,11 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('password-reset', function (Request $request) {
             return Limit::perMinute(5)->by($request->ip());
+        });
+
+        // Each checkout creates a Stripe session; stop accidental or abusive loops.
+        RateLimiter::for('checkout', function (Request $request) {
+            return Limit::perMinute(10)->by($request->user()?->id ?: $request->ip());
         });
     }
 

@@ -7,6 +7,7 @@ use App\Http\Requests\Course\CourseCatalogRequest;
 use App\Http\Resources\CourseDetailResource;
 use App\Http\Resources\CourseResource;
 use App\Models\Course;
+use App\Models\Enrollment;
 use App\Services\CourseCatalogService;
 use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
@@ -36,6 +37,13 @@ class CourseController extends Controller
         // Unpublished courses look like they don't exist to everyone else.
         abort_unless(Gate::forUser($viewer)->allows('view', $course), 404);
 
-        return ApiResponse::success(new CourseDetailResource($this->catalogue->loadDetail($course)));
+        $course = $this->catalogue->loadDetail($course);
+
+        // Lets the page show "Go to course" instead of "Enroll" for enrolled students.
+        $course->setRelation('viewerEnrollment', $viewer
+            ? Enrollment::where('user_id', $viewer->id)->where('course_id', $course->id)->first()
+            : null);
+
+        return ApiResponse::success(new CourseDetailResource($course));
     }
 }
