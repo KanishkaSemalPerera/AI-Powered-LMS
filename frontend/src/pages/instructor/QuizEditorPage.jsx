@@ -4,6 +4,7 @@ import { ArrowLeft, ListChecks, Plus, Sparkles, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { Link, useNavigate, useParams } from 'react-router'
+import { buttonClasses } from '@/components/ui/buttonStyles'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import { getMyCourse } from '@/api/instructor'
@@ -271,6 +272,12 @@ export default function QuizEditorPage() {
           </div>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">For the lesson “{quizQuery.data.lesson.title}”.</p>
         </div>
+        {!locked && (
+          <Link to={`/instructor/ai/quiz-generator?course=${courseId}&lesson=${lessonId}`} className={buttonClasses({ variant: 'outline' })}>
+            <Sparkles className="size-4" aria-hidden="true" />
+            {quiz ? 'Regenerate with AI' : 'Generate with AI'}
+          </Link>
+        )}
       </div>
 
       {locked && <Alert variant="info">This course is under review, so its quizzes can’t be edited right now.</Alert>}

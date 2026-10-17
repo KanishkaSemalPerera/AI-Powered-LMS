@@ -919,6 +919,69 @@
           }
         }
       ]
+    },
+    {
+      "name": "AI (needs ANTHROPIC_API_KEY on the server)",
+      "item": [
+        {
+          "name": "AI usage",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/ai/usage"
+          }
+        },
+        {
+          "name": "Instructor: generate quiz (draft)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/instructor/lessons/{{lessonId}}/ai/quiz",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"num_questions\": 5,\n  \"difficulty\": \"medium\",\n  \"replace\": false\n}"
+            }
+          }
+        },
+        {
+          "name": "Instructor: course description helper",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/instructor/ai/course-description",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Modern JavaScript from Scratch\",\n  \"level\": \"beginner\",\n  \"notes\": \"Variables, functions, arrays, async/await\",\n  \"tone\": \"friendly\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Student: ask the study assistant",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/learn/{{courseSlug}}/lessons/{{lessonId}}/assistant",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"question\": \"Can you explain this lesson in simpler words?\",\n  \"history\": []\n}"
+            }
+          }
+        }
+      ]
     }
   ]
 }

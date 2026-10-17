@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Api\V1\AiController;
 use App\Http\Controllers\Api\V1\Admin\CourseController as AdminCourseController;
 use App\Http\Controllers\Api\V1\Auth\AuthController;
 use App\Http\Controllers\Api\V1\Auth\PasswordResetController;
@@ -82,7 +83,12 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
         Route::get('/lessons/{lesson}/quiz', [QuizAttemptController::class, 'show'])->name('quiz.show');
         Route::get('/lessons/{lesson}/quiz/attempts', [QuizAttemptController::class, 'index'])->name('quiz.attempts.index');
         Route::post('/lessons/{lesson}/quiz/attempts', [QuizAttemptController::class, 'store'])->middleware('throttle:quiz-attempts')->name('quiz.attempts.store');
+
+        // AI study assistant for this lesson
+        Route::post('/lessons/{lesson}/assistant', [AiController::class, 'ask'])->middleware('throttle:ai')->name('assistant');
     });
+
+    Route::get('/ai/usage', [AiController::class, 'usage'])->name('ai.usage');
     Route::get('/quiz-attempts/{attempt}', [QuizAttemptController::class, 'showAttempt'])->name('quiz-attempts.show');
 
     // -------------------------------------------------------------- Student
@@ -120,6 +126,12 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
         Route::get('/lessons/{lesson}/quiz', [InstructorQuizController::class, 'show'])->name('lessons.quiz.show');
         Route::put('/lessons/{lesson}/quiz', [InstructorQuizController::class, 'upsert'])->name('lessons.quiz.upsert');
         Route::delete('/lessons/{lesson}/quiz', [InstructorQuizController::class, 'destroy'])->name('lessons.quiz.destroy');
+
+        // AI tools
+        Route::middleware('throttle:ai')->group(function () {
+            Route::post('/lessons/{lesson}/ai/quiz', [AiController::class, 'generateQuiz'])->name('ai.quiz');
+            Route::post('/ai/course-description', [AiController::class, 'courseDescription'])->name('ai.description');
+        });
     });
 
     // -------------------------------------------------------------- Admin
