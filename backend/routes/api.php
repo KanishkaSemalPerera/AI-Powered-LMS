@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\V1\CourseController;
 use App\Http\Controllers\Api\V1\HealthController;
 use App\Http\Controllers\Api\V1\Instructor\CourseController as InstructorCourseController;
 use App\Http\Controllers\Api\V1\Instructor\CurriculumController;
+use App\Http\Controllers\Api\V1\LearnController;
 use App\Http\Controllers\Api\V1\LessonVideoController;
 use App\Http\Controllers\Api\V1\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -36,6 +37,7 @@ Route::get('/health', HealthController::class)->name('health');
 Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
 Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
 Route::get('/courses/{course:slug}', [CourseController::class, 'show'])->name('courses.show');
+Route::get('/courses/{course:slug}/lessons/{lesson}/preview', [LearnController::class, 'preview'])->name('courses.lessons.preview');
 
 // Uploaded lesson video playback. Access is granted by the temporary URL signature.
 Route::get('/lessons/{lesson}/video', LessonVideoController::class)->middleware('signed')->name('lessons.video');
@@ -66,6 +68,15 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     });
 
     Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
+
+    // -------------------------------------------------------------- Course player
+    // Enrolled students, plus the owner/admin in preview mode (CoursePolicy::learn).
+    Route::prefix('learn/{course:slug}')->name('learn.')->group(function () {
+        Route::get('/', [LearnController::class, 'show'])->name('show');
+        Route::get('/lessons/{lesson}', [LearnController::class, 'lesson'])->name('lesson');
+        Route::post('/lessons/{lesson}/complete', [LearnController::class, 'complete'])->name('complete');
+        Route::delete('/lessons/{lesson}/complete', [LearnController::class, 'uncomplete'])->name('uncomplete');
+    });
 
     // -------------------------------------------------------------- Student
     Route::middleware('role:student')->group(function () {

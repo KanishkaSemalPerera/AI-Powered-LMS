@@ -98,7 +98,7 @@ class DemoActivitySeeder extends Seeder
             'user_id' => $student->id,
             'course_id' => $course->id,
             'payment_id' => $payment?->id,
-            'progress_percent' => $lessons->isEmpty() ? 0 : (int) round($completedCount / $lessons->count() * 100),
+            'progress_percent' => $lessons->isEmpty() ? 0 : (int) floor($completedCount / $lessons->count() * 100), // same rule as ProgressService
             // Resume point: the next unfinished lesson, or the last lesson when done.
             'last_lesson_id' => $completedCount > 0 ? ($lessons->get($completedCount) ?? $lessons->last())->id : null,
             'last_accessed_at' => $completedCount > 0 ? $lastActivity : null,

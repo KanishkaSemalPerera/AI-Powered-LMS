@@ -787,6 +787,49 @@
           }
         }
       ]
+    },
+    {
+      "name": "Course player (log in as an enrolled student)",
+      "item": [
+        {
+          "name": "Player: curriculum & progress",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/learn/{{courseSlug}}"
+          }
+        },
+        {
+          "name": "Player: lesson",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/learn/{{courseSlug}}/lessons/{{lessonId}}"
+          }
+        },
+        {
+          "name": "Mark lesson complete",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/learn/{{courseSlug}}/lessons/{{lessonId}}/complete"
+          }
+        },
+        {
+          "name": "Mark lesson not complete",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/learn/{{courseSlug}}/lessons/{{lessonId}}/complete"
+          }
+        },
+        {
+          "name": "Free preview lesson (public)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "url": "{{baseUrl}}/courses/{{courseSlug}}/lessons/{{lessonId}}/preview"
+          }
+        }
+      ]
     }
   ]
 }

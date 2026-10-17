@@ -84,6 +84,18 @@ Roles: **Public** = no token · **Auth** = any signed-in active user.
 
 Payment safety: the amount and currency charged by Stripe must match the recorded payment or it is marked `failed`; fulfilment locks the payment row so the webhook and the success page can run at the same time without double enrollment.
 
+### Course player — enrolled students (owner/admin get read-only `preview` mode)
+
+| Method | URL | Description |
+|---|---|---|
+| GET | `/learn/{slug}` | Curriculum with `is_completed` per lesson, `mode` (`student`/`preview`) and `progress`: `{ progress_percent, completed_lesson_ids, completed_lessons, total_lessons, completed_at, resume_lesson_id }` (null in preview). 403 if not enrolled |
+| GET | `/learn/{slug}/lessons/{id}` | Full lesson (content, `playback_url`), `is_completed`, `navigation: { index, total, previous_lesson_id, next_lesson_id }`. Also saves the resume point |
+| POST | `/learn/{slug}/lessons/{id}/complete` | Mark complete (idempotent) → progress plus `course_completed_now` (true once, the first time 100% is reached) |
+| DELETE | `/learn/{slug}/lessons/{id}/complete` | Mark not complete. A completed course stays completed |
+| GET | `/courses/{slug}/lessons/{id}/preview` | Public: a published course's free-preview lesson (404 otherwise) |
+
+Progress is `floor(completed / total lessons × 100)`. Resume order: last visited lesson → first incomplete lesson → first lesson.
+
 ### Instructor — role `instructor`, own courses only
 
 | Method | URL | Description |

@@ -21,6 +21,18 @@ class CoursePolicy
             || (bool) $user?->isAdmin();
     }
 
+    /**
+     * Full lesson content and videos: enrolled students, plus the course
+     * owner and admins (who use the player as a read-only preview).
+     */
+    public function learn(User $user, Course $course): Response
+    {
+        // Enrolled students keep access even if the course is later unpublished.
+        return $course->isOwnedBy($user) || $user->isAdmin() || $user->isEnrolledIn($course)
+            ? Response::allow()
+            : Response::deny('Enroll in this course to access its lessons.');
+    }
+
     public function create(User $user): bool
     {
         return $user->isInstructor();

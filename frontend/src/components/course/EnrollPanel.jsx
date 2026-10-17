@@ -63,7 +63,7 @@ export default function EnrollPanel({ course }) {
         <ProgressBar value={course.enrollment.progress_percent} label="Your progress" showValue />
         <Link to={continueLearningPath(course)} className={buttonClasses({ size: 'lg', className: 'w-full' })}>
           <CirclePlay className="size-4" aria-hidden="true" />
-          You&apos;re enrolled — go to my courses
+          {course.enrollment.progress_percent > 0 ? 'Continue learning' : 'Start learning'}
         </Link>
       </div>
     )
