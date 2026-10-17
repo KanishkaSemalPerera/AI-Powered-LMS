@@ -1,16 +1,16 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, ExternalLink, ImagePlus, Send } from 'lucide-react'
+import { ArrowLeft, ExternalLink, ImagePlus, ListTree, Send, SquarePen } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { Link, useNavigate, useParams } from 'react-router'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import { getCategories } from '@/api/courses'
 import * as instructorApi from '@/api/instructor'
 import CourseStatusBadge from '@/components/course/CourseStatusBadge'
 import CourseThumbnail from '@/components/course/CourseThumbnail'
-import CurriculumList from '@/components/course/CurriculumList'
+import CurriculumBuilder from '@/components/course/builder/CurriculumBuilder'
 import ListFieldEditor from '@/components/course/ListFieldEditor'
 import Alert from '@/components/ui/Alert'
 import Button from '@/components/ui/Button'
@@ -26,7 +26,13 @@ import Textarea from '@/components/ui/Textarea'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { applyFieldErrors, getErrorMessage } from '@/utils/apiError'
 import { LEVEL_OPTIONS } from '@/utils/courseOptions'
+import { cn } from '@/utils/cn'
 import { plural } from '@/utils/format'
+
+const EDITOR_TABS = [
+  { value: 'details', label: 'Details', icon: SquarePen },
+  { value: 'curriculum', label: 'Curriculum', icon: ListTree },
+]
 
 const THUMBNAIL_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 const THUMBNAIL_MAX_BYTES = 4 * 1024 * 1024
@@ -283,6 +289,8 @@ export default function CourseEditorPage() {
 
   const course = courseQuery.data
   const [problems, setProblems] = useState(null)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const tab = searchParams.get('tab') === 'curriculum' ? 'curriculum' : 'details'
   useDocumentTitle(isNew ? 'New course' : course ? `Edit: ${course.title}` : 'Edit course')
 
   if (!isNew && courseQuery.isPending) return <PageLoader />
@@ -346,24 +354,45 @@ export default function CourseEditorPage() {
         <Alert variant="success">This course is live. Changes you save are visible to students immediately.</Alert>
       )}
 
-      <div className="grid gap-6 xl:grid-cols-[1fr_20rem]">
-        <CourseForm key={course?.id ?? 'new'} course={course} categories={categoriesQuery.data} disabled={locked} />
-        {course && (
-          <div className="space-y-6">
-            <ThumbnailCard course={course} disabled={locked} />
-            <Card aria-labelledby="curriculum-heading">
-              <CardHeader id="curriculum-heading" title="Curriculum" description="Sections and lessons in this course." />
-              <CardBody>
-                <CurriculumList
-                  sections={course.sections}
-                  defaultOpen={0}
-                  emptyText="No sections or lessons yet. You need at least one lesson before submitting for review."
-                />
-              </CardBody>
-            </Card>
-          </div>
-        )}
-      </div>
+      {course && (
+        <div role="tablist" aria-label="Course editor sections" className="flex gap-1 border-b border-slate-200 dark:border-slate-800">
+          {EDITOR_TABS.map((item) => (
+            <button
+              key={item.value}
+              type="button"
+              role="tab"
+              id={`tab-${item.value}`}
+              aria-selected={tab === item.value}
+              aria-controls={`panel-${item.value}`}
+              onClick={() => setSearchParams(item.value === 'details' ? {} : { tab: item.value }, { replace: true })}
+              className={cn(
+                '-mb-px flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors',
+                tab === item.value
+                  ? 'border-brand-600 text-brand-700 dark:text-brand-300'
+                  : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200',
+              )}
+            >
+              <item.icon className="size-4" aria-hidden="true" />
+              {item.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {tab === 'curriculum' && course ? (
+        <div role="tabpanel" id="panel-curriculum" aria-labelledby="tab-curriculum">
+          <CurriculumBuilder courseId={course.id} locked={locked} />
+        </div>
+      ) : (
+        <div role="tabpanel" id="panel-details" aria-labelledby={course ? 'tab-details' : undefined} className="grid gap-6 xl:grid-cols-[1fr_20rem]">
+          <CourseForm key={course?.id ?? 'new'} course={course} categories={categoriesQuery.data} disabled={locked} />
+          {course && (
+            <div>
+              <ThumbnailCard course={course} disabled={locked} />
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }

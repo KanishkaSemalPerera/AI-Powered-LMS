@@ -7,6 +7,8 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the architecture, ER diagra
 ## Requirements
 
 - PHP 8.2 (XAMPP) with the `gd`, `intl`, `sodium`, `zip`, `fileinfo` and `pdo_mysql` extensions enabled in `C:\xampp\php\php.ini`
+- For lesson video uploads, raise these in `C:\xampp\php\php.ini` and restart `php artisan serve`:
+  `upload_max_filesize=512M`, `post_max_size=520M`, `max_input_time=300`
 - Composer 2.x
 - MariaDB 10.4 (XAMPP MySQL)
 - Node.js 24 and npm

@@ -42,6 +42,14 @@
     {
       "key": "categoryId",
       "value": "1"
+    },
+    {
+      "key": "sectionId",
+      "value": "1"
+    },
+    {
+      "key": "lessonId",
+      "value": "1"
     }
   ],
   "event": [
@@ -532,6 +540,185 @@
           "request": {
             "method": "DELETE",
             "url": "{{baseUrl}}/admin/categories/{{categoryId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Course builder (log in as instructor1@lms.test)",
+      "item": [
+        {
+          "name": "Get curriculum",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/instructor/courses/{{courseId}}/curriculum"
+          }
+        },
+        {
+          "name": "Add section",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const b=pm.response.json(); if(b.success){pm.collectionVariables.set(\"sectionId\", b.data.id);}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/instructor/courses/{{courseId}}/sections",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Getting started\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Rename section",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/instructor/sections/{{sectionId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Introduction\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Add text lesson",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const b=pm.response.json(); if(b.success){pm.collectionVariables.set(\"lessonId\", b.data.id);}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/instructor/sections/{{sectionId}}/lessons",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Welcome\",\n  \"type\": \"text\",\n  \"content\": \"## Welcome\\n\\nWhat this course covers.\",\n  \"duration_minutes\": 5,\n  \"is_preview\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Add video-link lesson",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/instructor/sections/{{sectionId}}/lessons",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Intro video\",\n  \"type\": \"video\",\n  \"video_url\": \"https://www.youtube.com/watch?v=dQw4w9WgXcQ\",\n  \"duration_minutes\": 3\n}"
+            }
+          }
+        },
+        {
+          "name": "Update lesson",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/instructor/lessons/{{lessonId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Welcome to the course\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Upload lesson video",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/instructor/lessons/{{lessonId}}/video",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "video",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "duration_seconds",
+                  "value": "120",
+                  "type": "text"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Remove lesson video",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/instructor/lessons/{{lessonId}}/video"
+          }
+        },
+        {
+          "name": "Reorder curriculum",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/instructor/courses/{{courseId}}/curriculum/order",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sections\": [\n    {\n      \"id\": 1,\n      \"lessons\": [\n        2,\n        1\n      ]\n    }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete lesson",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/instructor/lessons/{{lessonId}}"
+          }
+        },
+        {
+          "name": "Delete section",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/instructor/sections/{{sectionId}}"
           }
         }
       ]
