@@ -15,6 +15,11 @@ class Enrollment extends Model
     /** Enrollments are created by the enrollment/payment services, never from raw input. */
     protected $guarded = ['id'];
 
+    /** Mirrors the column default so a fresh model reports 0%, not null. */
+    protected $attributes = [
+        'progress_percent' => 0,
+    ];
+
     protected function casts(): array
     {
         return [

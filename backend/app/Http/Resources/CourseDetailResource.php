@@ -43,6 +43,13 @@ class CourseDetailResource extends CourseResource
                 ])->values(),
             ])->values()),
             'can_manage' => $canManage,
+            // The viewer's own enrollment (public course page only); null when not enrolled.
+            'enrollment' => $this->when($this->relationLoaded('viewerEnrollment'), fn () => $this->viewerEnrollment ? [
+                'id' => $this->viewerEnrollment->id,
+                'progress_percent' => $this->viewerEnrollment->progress_percent,
+                'last_lesson_id' => $this->viewerEnrollment->last_lesson_id,
+                'completed_at' => $this->viewerEnrollment->completed_at?->toIso8601String(),
+            ] : null),
             'rejection_reason' => $this->when($canManage, $this->rejection_reason),
             'submitted_at' => $this->when($canManage, fn () => $this->submitted_at?->toIso8601String()),
             'created_at' => $this->created_at?->toIso8601String(),
