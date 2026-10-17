@@ -65,9 +65,11 @@ erDiagram
         string email UK
         string password
         enum role "student|instructor|admin"
-        string avatar_path
+        string headline
         text bio
+        string avatar_path
         boolean is_active
+        timestamp last_login_at
     }
     CATEGORIES {
         bigint id PK
@@ -81,15 +83,21 @@ erDiagram
         bigint category_id FK
         string title
         string slug UK
-        text description
+        string subtitle
+        longtext description
+        json what_you_will_learn
+        json requirements
         string thumbnail_path
         decimal price "0 = free"
-        enum level "beginner|intermediate|advanced"
+        enum level "beginner|intermediate|advanced|all_levels"
         string language
         enum status "draft|pending|published|rejected"
         text rejection_reason
-        decimal rating_avg
-        int rating_count
+        boolean is_featured
+        decimal rating_avg "cached"
+        int rating_count "cached"
+        int students_count "cached"
+        timestamp submitted_at
         timestamp published_at
     }
     SECTIONS {
@@ -101,6 +109,7 @@ erDiagram
     LESSONS {
         bigint id PK
         bigint section_id FK
+        bigint course_id FK "denormalised"
         string title
         enum type "video|text"
         string video_path
@@ -114,9 +123,10 @@ erDiagram
         bigint id PK
         bigint lesson_id FK "unique"
         string title
+        text description
         int pass_mark "percent"
         enum status "draft|published"
-        boolean ai_generated
+        boolean is_ai_generated
     }
     QUESTIONS {
         bigint id PK
@@ -131,8 +141,10 @@ erDiagram
         bigint id PK
         bigint user_id FK
         bigint course_id FK
+        bigint payment_id FK "null for free"
         bigint last_lesson_id FK "resume point"
         int progress_percent
+        timestamp last_accessed_at
         timestamp completed_at
     }
     LESSON_PROGRESS {
@@ -146,8 +158,9 @@ erDiagram
         bigint user_id FK
         bigint quiz_id FK
         json answers
-        int score
-        int total
+        int correct_count
+        int total_questions
+        int score_percent
         boolean passed
     }
     PAYMENTS {
@@ -155,10 +168,10 @@ erDiagram
         bigint user_id FK
         bigint course_id FK
         string stripe_session_id UK
-        string stripe_payment_intent
+        string stripe_payment_intent_id
         decimal amount
         string currency
-        enum status "pending|paid|failed|refunded"
+        enum status "pending|paid|failed|expired|refunded"
         timestamp paid_at
     }
     REVIEWS {
@@ -173,17 +186,23 @@ erDiagram
         bigint user_id FK
         bigint course_id FK
         string code UK "verification code"
+        string student_name "snapshot"
+        string course_title "snapshot"
+        string instructor_name "snapshot"
         timestamp issued_at
     }
     AI_REQUESTS {
         bigint id PK
         bigint user_id FK
         enum feature "quiz_generator|study_assistant|description_helper"
+        string subject_type "Lesson|Course"
+        bigint subject_id
         string model
         int input_tokens
         int output_tokens
-        enum status "success|error"
         int duration_ms
+        enum status "success|error"
+        string error_message
     }
     NOTIFICATIONS {
         uuid id PK

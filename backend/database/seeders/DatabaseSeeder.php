@@ -2,22 +2,25 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
     /**
-     * Seed the application's database.
+     * Seed the demo platform. Run with:  php artisan migrate:fresh --seed
+     *
+     * Demo logins (password "password" for all):
+     *   admin@lms.test
+     *   instructor1@lms.test … instructor3@lms.test
+     *   student1@lms.test … student10@lms.test
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $this->call([
+            UserSeeder::class,
+            CategorySeeder::class,
+            CourseSeeder::class,
+            DemoActivitySeeder::class,
         ]);
     }
 }
