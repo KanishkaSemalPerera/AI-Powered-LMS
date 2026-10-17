@@ -94,6 +94,17 @@ Payment safety: the amount and currency charged by Stripe must match the recorde
 | DELETE | `/learn/{slug}/lessons/{id}/complete` | Mark not complete. A completed course stays completed |
 | GET | `/courses/{slug}/lessons/{id}/preview` | Public: a published course's free-preview lesson (404 otherwise) |
 
+### Quizzes — taking (enrolled students; owner/admin can view but not submit)
+
+| Method | URL | Description |
+|---|---|---|
+| GET | `/learn/{slug}/lessons/{id}/quiz` | Published quiz **without** `correct_option`/`explanation`, `can_submit`, and `summary: { attempts, best_score, passed }`. 404 for drafts |
+| POST | `/learn/{slug}/lessons/{id}/quiz/attempts` | `{ "answers": { "<questionId>": optionIndex } }` → scored server-side; returns `score_percent`, `passed`, and `review` (chosen/correct option + explanation per question). Unanswered = wrong. Passing marks the lesson complete. Rate limited (10/min) |
+| GET | `/learn/{slug}/lessons/{id}/quiz/attempts` | My attempt history (newest first, paginated) |
+| GET | `/quiz-attempts/{id}` | Review one of my attempts (404 for others' attempts) |
+
+`GET /learn/{slug}/lessons/{id}` includes `quiz: { id, title, pass_mark, questions_count, attempts, best_score, passed }` when the lesson has a published quiz; the curriculum marks lessons with `has_quiz`.
+
 Progress is `floor(completed / total lessons × 100)`. Resume order: last visited lesson → first incomplete lesson → first lesson.
 
 ### Instructor — role `instructor`, own courses only
@@ -123,6 +134,9 @@ Progress is `floor(completed / total lessons × 100)`. Resume order: last visite
 | DELETE | `/instructor/lessons/{id}` | Delete lesson and its video |
 | POST | `/instructor/lessons/{id}/video` | Upload video (`multipart/form-data`: `video` mp4/webm/mov ≤ 500 MB, optional `duration_seconds`) |
 | DELETE | `/instructor/lessons/{id}/video` | Remove the uploaded video |
+| GET | `/instructor/lessons/{id}/quiz` | `{ lesson, quiz }` — quiz with answer key, or `null` |
+| PUT | `/instructor/lessons/{id}/quiz` | Create/replace the quiz: `{ title, description?, pass_mark (1–100), status: draft\|published, questions: [{ question, options: [2–6 distinct], correct_option, explanation? }] }`. Publishing needs ≥ 1 question |
+| DELETE | `/instructor/lessons/{id}/quiz` | Delete the quiz and its attempts |
 
 ### Lesson video playback
 

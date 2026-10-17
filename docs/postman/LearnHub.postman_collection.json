@@ -54,6 +54,10 @@
     {
       "key": "sessionId",
       "value": ""
+    },
+    {
+      "key": "attemptId",
+      "value": "1"
     }
   ],
   "event": [
@@ -827,6 +831,91 @@
             },
             "method": "GET",
             "url": "{{baseUrl}}/courses/{{courseSlug}}/lessons/{{lessonId}}/preview"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Quizzes",
+      "item": [
+        {
+          "name": "Instructor: get lesson quiz",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/instructor/lessons/{{lessonId}}/quiz"
+          }
+        },
+        {
+          "name": "Instructor: save lesson quiz",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/instructor/lessons/{{lessonId}}/quiz",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Check your understanding\",\n  \"description\": \"Two quick questions.\",\n  \"pass_mark\": 70,\n  \"status\": \"published\",\n  \"questions\": [\n    {\n      \"question\": \"Which keyword declares a constant?\",\n      \"options\": [\n        \"var\",\n        \"let\",\n        \"const\"\n      ],\n      \"correct_option\": 2,\n      \"explanation\": \"const cannot be reassigned.\"\n    },\n    {\n      \"question\": \"What does 2 + 2 equal?\",\n      \"options\": [\n        \"3\",\n        \"4\"\n      ],\n      \"correct_option\": 1,\n      \"explanation\": null\n    }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Instructor: delete lesson quiz",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/instructor/lessons/{{lessonId}}/quiz"
+          }
+        },
+        {
+          "name": "Student: get quiz",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/learn/{{courseSlug}}/lessons/{{lessonId}}/quiz"
+          }
+        },
+        {
+          "name": "Student: submit attempt",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const b=pm.response.json(); if(b.success){pm.collectionVariables.set(\"attemptId\", b.data.id);}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/learn/{{courseSlug}}/lessons/{{lessonId}}/quiz/attempts",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"answers\": {\n    \"1\": 2,\n    \"2\": 1\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Student: attempt history",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/learn/{{courseSlug}}/lessons/{{lessonId}}/quiz/attempts"
+          }
+        },
+        {
+          "name": "Student: review attempt",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/quiz-attempts/{{attemptId}}"
           }
         }
       ]
