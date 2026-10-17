@@ -17,6 +17,13 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->enum('role', ['student', 'instructor', 'admin'])->default('student')->index();
+            $table->string('headline', 120)->nullable();
+            $table->text('bio')->nullable();
+            $table->string('avatar_path')->nullable();
+            // Deactivated users cannot log in; used instead of hard deletes to keep payment history.
+            $table->boolean('is_active')->default(true);
+            $table->timestamp('last_login_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

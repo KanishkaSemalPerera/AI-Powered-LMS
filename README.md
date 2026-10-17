@@ -22,7 +22,7 @@ cd backend
 composer install
 Copy-Item .env.example .env
 php artisan key:generate
-php artisan migrate
+php artisan migrate --seed
 php artisan storage:link
 
 # 3. Frontend
@@ -45,6 +45,22 @@ cd backend; php artisan queue:listen --tries=1
 # Terminal 3 — React app on http://localhost:5173
 cd frontend; npm run dev
 ```
+
+## Demo data
+
+`php artisan migrate:fresh --seed` rebuilds the database with demo content (this deletes all existing data).
+Every demo account uses the password **`password`**.
+
+| Role | Email | Notes |
+|---|---|---|
+| Admin | `admin@lms.test` | Alex Morgan |
+| Instructor | `instructor1@lms.test` | Sarah Chen — JavaScript, React, Laravel (pending review) |
+| Instructor | `instructor2@lms.test` | David Okafor — Python, Machine Learning, Prompt Engineering |
+| Instructor | `instructor3@lms.test` | Maria Lopez — UI Design, Personal Branding (draft) |
+| Student | `student1@lms.test` | Emma Wilson — 1 completed course with certificate, 1 in progress, 1 just started |
+| Student | `student2@lms.test` … `student10@lms.test` | Random enrollments, progress, reviews and payments |
+
+Tests run on an in-memory SQLite database (`phpunit.xml`), so `php artisan test` never touches `lms_db`.
 
 ## Branching (Git Flow)
 
