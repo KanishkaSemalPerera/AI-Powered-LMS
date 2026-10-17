@@ -7,6 +7,7 @@ use App\Enums\PaymentStatus;
 use App\Models\Course;
 use App\Models\Payment;
 use App\Models\User;
+use App\Services\EnrollmentService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 use Tests\Fakes\FakePaymentGateway;
@@ -58,7 +59,7 @@ class CheckoutTest extends TestCase
         $free = Course::factory()->published()->free()->create();
         $this->postJson("/api/v1/courses/{$free->id}/checkout")->assertUnprocessable();
 
-        $this->app->make(\App\Services\EnrollmentService::class)->grantAccess($this->student, $this->course);
+        $this->app->make(EnrollmentService::class)->grantAccess($this->student, $this->course);
         $this->postJson("/api/v1/courses/{$this->course->id}/checkout")->assertStatus(409);
     }
 

@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Database\Factories\QuizAttemptFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class QuizAttempt extends Model
 {
-    /** @use HasFactory<\Database\Factories\QuizAttemptFactory> */
+    /** @use HasFactory<QuizAttemptFactory> */
     use HasFactory;
 
     protected $fillable = [

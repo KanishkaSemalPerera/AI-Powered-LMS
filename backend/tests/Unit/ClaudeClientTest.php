@@ -13,6 +13,7 @@ use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Psr\Http\Message\RequestInterface;
 use Tests\TestCase;
 
 /**
@@ -21,7 +22,7 @@ use Tests\TestCase;
  */
 class ClaudeClientTest extends TestCase
 {
-    /** @var array<int, array{request: \Psr\Http\Message\RequestInterface}> */
+    /** @var array<int, array{request: RequestInterface}> */
     private array $history = [];
 
     protected function setUp(): void

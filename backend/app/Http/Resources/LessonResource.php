@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Lesson;
 use App\Services\LessonVideoService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -10,7 +11,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * Full lesson including content and a playback URL. Only returned to people
  * allowed to watch it (the instructor now; enrolled students in the player).
  *
- * @mixin \App\Models\Lesson
+ * @mixin Lesson
  */
 class LessonResource extends JsonResource
 {

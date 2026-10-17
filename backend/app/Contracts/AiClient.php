@@ -2,6 +2,7 @@
 
 namespace App\Contracts;
 
+use App\Exceptions\AiException;
 use App\Support\Ai\AiCompletion;
 use App\Support\Ai\AiPrompt;
 
@@ -17,7 +18,7 @@ interface AiClient
     public function model(): string;
 
     /**
-     * @throws \App\Exceptions\AiException on any provider error, timeout or refusal
+     * @throws AiException on any provider error, timeout or refusal
      */
     public function complete(AiPrompt $prompt): AiCompletion;
 }

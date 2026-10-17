@@ -4,11 +4,12 @@ namespace Database\Factories;
 
 use App\Enums\AiFeature;
 use App\Enums\AiRequestStatus;
+use App\Models\AiRequest;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\AiRequest>
+ * @extends Factory<AiRequest>
  */
 class AiRequestFactory extends Factory
 {

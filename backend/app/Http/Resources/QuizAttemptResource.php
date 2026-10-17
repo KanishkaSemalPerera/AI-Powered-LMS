@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\QuizAttempt;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -9,7 +10,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * A submitted attempt. With the quiz's questions loaded it includes a review:
  * the student's choice, the correct option and the explanation per question.
  *
- * @mixin \App\Models\QuizAttempt
+ * @mixin QuizAttempt
  */
 class QuizAttemptResource extends JsonResource
 {

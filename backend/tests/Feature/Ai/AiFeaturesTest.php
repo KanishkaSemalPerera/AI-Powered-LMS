@@ -13,6 +13,7 @@ use App\Models\Quiz;
 use App\Models\Section;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Testing\TestResponse;
 use Laravel\Sanctum\Sanctum;
 use Tests\Fakes\FakeAiClient;
 use Tests\TestCase;
@@ -54,7 +55,7 @@ class AiFeaturesTest extends TestCase
         ], $overrides);
     }
 
-    private function generate(array $payload = []): \Illuminate\Testing\TestResponse
+    private function generate(array $payload = []): TestResponse
     {
         return $this->postJson("/api/v1/instructor/lessons/{$this->lesson->id}/ai/quiz", array_merge([
             'num_questions' => 3,

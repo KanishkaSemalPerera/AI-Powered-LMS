@@ -9,7 +9,7 @@ use App\Models\Quiz;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Quiz>
+ * @extends Factory<Quiz>
  */
 class QuizFactory extends Factory
 {

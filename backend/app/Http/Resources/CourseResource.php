@@ -2,13 +2,14 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Course;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  * Course summary for cards and tables.
  *
- * @mixin \App\Models\Course
+ * @mixin Course
  */
 class CourseResource extends JsonResource
 {

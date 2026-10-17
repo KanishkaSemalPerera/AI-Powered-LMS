@@ -2,13 +2,14 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Quiz;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  * Quiz for the instructor's editor — includes the answer key.
  *
- * @mixin \App\Models\Quiz
+ * @mixin Quiz
  */
 class QuizResource extends JsonResource
 {

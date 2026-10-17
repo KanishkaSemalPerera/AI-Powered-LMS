@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\CourseLevel;
 use App\Enums\CourseStatus;
 use App\Models\Concerns\HasUniqueSlug;
+use Database\Factories\CourseFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,7 +17,7 @@ use Illuminate\Support\Facades\Storage;
 
 class Course extends Model
 {
-    /** @use HasFactory<\Database\Factories\CourseFactory> */
+    /** @use HasFactory<CourseFactory> */
     use HasFactory, HasUniqueSlug;
 
     protected string $slugSource = 'title';
