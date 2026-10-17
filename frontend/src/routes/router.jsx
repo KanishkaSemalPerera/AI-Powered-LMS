@@ -55,6 +55,10 @@ export const router = createBrowserRouter([
       {
         element: <ProtectedRoute />,
         children: [
+          // Course player has its own full-screen layout. The API decides access
+          // (enrolled students; owners and admins in preview mode).
+          { path: 'learn/:slug', lazy: page(() => import('@/pages/student/CoursePlayerPage')) },
+          { path: 'learn/:slug/lessons/:lessonId', lazy: page(() => import('@/pages/student/CoursePlayerPage')) },
           {
             element: <DashboardLayout />,
             children: [

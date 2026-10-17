@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, ExternalLink, ImagePlus, ListTree, Send, SquarePen } from 'lucide-react'
+import { ArrowLeft, CirclePlay, ExternalLink, ImagePlus, ListTree, Send, SquarePen } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
@@ -28,6 +28,7 @@ import { applyFieldErrors, getErrorMessage } from '@/utils/apiError'
 import { LEVEL_OPTIONS } from '@/utils/courseOptions'
 import { cn } from '@/utils/cn'
 import { plural } from '@/utils/format'
+import { learnPath } from '@/utils/paths'
 
 const EDITOR_TABS = [
   { value: 'details', label: 'Details', icon: SquarePen },
@@ -325,6 +326,12 @@ export default function CourseEditorPage() {
               <ExternalLink className="size-4" aria-hidden="true" />
               {course.status === 'published' ? 'View page' : 'Preview'}
             </Link>
+            {(course.lessons_count ?? 0) > 0 && (
+              <Link to={learnPath(course)} className={buttonClasses({ variant: 'outline' })}>
+                <CirclePlay className="size-4" aria-hidden="true" />
+                Preview as student
+              </Link>
+            )}
             <SubmitButton course={course} onProblems={setProblems} />
           </div>
         )}

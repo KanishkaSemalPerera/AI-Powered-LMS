@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { useState } from 'react'
 import { Check, Clock, Globe, Layers, Signal, Users } from 'lucide-react'
 import { Link, useParams } from 'react-router'
 import { getCourse } from '@/api/courses'
@@ -6,6 +7,7 @@ import CourseStatusBadge from '@/components/course/CourseStatusBadge'
 import CourseThumbnail from '@/components/course/CourseThumbnail'
 import CurriculumList from '@/components/course/CurriculumList'
 import EnrollPanel from '@/components/course/EnrollPanel'
+import PreviewLessonModal from '@/components/course/PreviewLessonModal'
 import Alert from '@/components/ui/Alert'
 import Avatar from '@/components/ui/Avatar'
 import Badge from '@/components/ui/Badge'
@@ -40,6 +42,7 @@ export default function CourseDetailPage() {
   // The response depends on who is viewing (enrollment, owner preview), so the
   // viewer is part of the cache key: logging in or out never shows stale data.
   const { user } = useAuth()
+  const [previewLesson, setPreviewLesson] = useState(null)
   const { data: course, error, isPending, refetch } = useQuery({
     queryKey: ['course', slug, user?.id ?? 'guest'],
     queryFn: () => getCourse(slug),
@@ -171,7 +174,7 @@ export default function CourseDetailPage() {
               {plural(course.sections?.length ?? 0, 'section')} · {plural(course.lessons_count ?? 0, 'lesson')} ·{' '}
               {formatDuration(course.duration_seconds)} total
             </p>
-            <CurriculumList sections={course.sections} />
+            <CurriculumList sections={course.sections} onPreview={setPreviewLesson} />
           </section>
 
           {course.requirements.length > 0 && (
@@ -230,6 +233,10 @@ export default function CourseDetailPage() {
           )}
         </div>
       </div>
+
+      {previewLesson && (
+        <PreviewLessonModal courseSlug={course.slug} lessonId={previewLesson.id} onClose={() => setPreviewLesson(null)} />
+      )}
     </>
   )
 }

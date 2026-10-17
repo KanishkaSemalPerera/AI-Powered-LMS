@@ -8,6 +8,7 @@ import { formatDuration, plural } from '@/utils/format'
 export default function CurriculumList({
   sections = [],
   defaultOpen = 1,
+  onPreview,
   emptyText = "The curriculum hasn't been published yet.",
 }) {
   const [openIds, setOpenIds] = useState(() => new Set(sections.slice(0, defaultOpen).map((s) => s.id)))
@@ -75,7 +76,19 @@ export default function CurriculumList({
                       <li key={lesson.id} className="flex items-center gap-3 px-4 py-2.5 text-sm">
                         <Icon className="size-4 shrink-0 text-slate-400" aria-hidden="true" />
                         <span className="flex-1">{lesson.title}</span>
-                        {lesson.is_preview && <Badge variant="brand">Preview</Badge>}
+                        {lesson.is_preview &&
+                          (onPreview ? (
+                            <button
+                              type="button"
+                              onClick={() => onPreview(lesson)}
+                              className="rounded-full bg-brand-50 px-2.5 py-0.5 text-xs font-medium text-brand-700 hover:bg-brand-100 dark:bg-brand-950 dark:text-brand-300"
+                              aria-label={`Watch free preview: ${lesson.title}`}
+                            >
+                              Preview
+                            </button>
+                          ) : (
+                            <Badge variant="brand">Preview</Badge>
+                          ))}
                         <span className="w-14 text-right text-xs text-slate-500 dark:text-slate-400">
                           {formatDuration(lesson.duration_seconds)}
                         </span>

@@ -73,7 +73,10 @@ export default function CheckoutSuccessPage() {
       <>
         <Link to={continueLearningPath(payment.course)} className={buttonClasses({ size: 'lg' })}>
           <CirclePlay className="size-4" aria-hidden="true" />
-          Go to my courses
+          Start learning
+        </Link>
+        <Link to="/my-courses" className={buttonClasses({ size: 'lg', variant: 'outline' })}>
+          My courses
         </Link>
       </>
     )

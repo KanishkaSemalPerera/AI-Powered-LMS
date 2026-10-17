@@ -13,7 +13,7 @@ import Skeleton from '@/components/ui/Skeleton'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { cn } from '@/utils/cn'
 import { formatDate } from '@/utils/format'
-import { coursePath } from '@/utils/paths'
+import { learnPath } from '@/utils/paths'
 
 const TABS = [
   { value: '', label: 'All courses' },
@@ -111,9 +111,9 @@ export default function MyCoursesPage() {
                     `Enrolled ${formatDate(enrolled_at)}`
                   )}
                 </p>
-                <Link to={coursePath(course)} className={buttonClasses({ className: 'mt-auto w-full' })}>
+                <Link to={learnPath(course)} className={buttonClasses({ className: 'mt-auto w-full' })}>
                   <CirclePlay className="size-4" aria-hidden="true" />
-                  View course
+                  {completed_at ? 'Review course' : progress_percent > 0 ? 'Continue learning' : 'Start course'}
                 </Link>
               </div>
             </article>
