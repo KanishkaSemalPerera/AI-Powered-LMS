@@ -7,6 +7,7 @@ import {
   Library,
   Receipt,
   ShieldCheck,
+  Sparkles,
   UserRound,
 } from 'lucide-react'
 import { ROLES } from '@/utils/roles'
@@ -23,6 +24,7 @@ export const sidebarNavigation = {
   [ROLES.INSTRUCTOR]: [
     { to: '/instructor', label: 'Dashboard', icon: LayoutDashboard, end: true },
     { to: '/instructor/courses', label: 'My courses', icon: Library },
+    { to: '/instructor/ai/quiz-generator', label: 'AI quiz generator', icon: Sparkles },
     { to: '/profile', label: 'Profile', icon: UserRound },
   ],
   [ROLES.ADMIN]: [

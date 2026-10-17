@@ -81,6 +81,7 @@ export const router = createBrowserRouter([
                   { path: 'courses/new', lazy: page(() => import('@/pages/instructor/CourseEditorPage')) },
                   { path: 'courses/:id/edit', lazy: page(() => import('@/pages/instructor/CourseEditorPage')) },
                   { path: 'courses/:courseId/lessons/:lessonId/quiz', lazy: page(() => import('@/pages/instructor/QuizEditorPage')) },
+                  { path: 'ai/quiz-generator', lazy: page(() => import('@/pages/instructor/AiQuizGeneratorPage')) },
                 ],
               },
               {

@@ -84,6 +84,19 @@ Free courses work without any setup. To sell paid courses locally:
 
 Even without step 3, the checkout success page confirms the payment directly with Stripe, so the student is still enrolled.
 
+## AI features (Claude)
+
+The AI quiz generator, lesson study assistant and course description helper call the Claude API **from the backend only** (official `anthropic-ai/sdk` PHP SDK). Without a key the app works and the AI buttons explain that AI isn't configured.
+
+1. Create an API key at https://console.anthropic.com and add it to `backend\.env`:
+   ```
+   ANTHROPIC_API_KEY=sk-ant-...
+   ANTHROPIC_MODEL=claude-opus-5-5
+   ```
+2. Restart `php artisan serve`. `GET /api/v1/health` now reports `"ai_configured": true`.
+
+Optional settings in `backend\.env`: `ANTHROPIC_EFFORT_QUIZ` / `_ASSISTANT` / `_DESCRIPTION` (thinking depth: `low`–`max`), `ANTHROPIC_TIMEOUT` (seconds), `AI_RATE_LIMIT_PER_MINUTE`, `AI_RATE_LIMIT_PER_DAY`. Change `ANTHROPIC_MODEL` to switch models without code changes. Usage per user is logged in the `ai_requests` table.
+
 ## Branching (Git Flow)
 
 `main` (releases) ← `release/*` ← `Develop` ← `feature/*`; urgent fixes use `hotfix/*` from `main`.

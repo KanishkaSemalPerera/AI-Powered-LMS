@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import * as learnApi from '@/api/learn'
 import LessonView from '@/components/course/player/LessonView'
 import PlayerCurriculum from '@/components/course/player/PlayerCurriculum'
+import StudyAssistant from '@/components/course/player/StudyAssistant'
 import ThemeToggle from '@/components/layout/ThemeToggle'
 import Alert from '@/components/ui/Alert'
 import Button from '@/components/ui/Button'
@@ -228,6 +229,9 @@ export default function CoursePlayerPage() {
           </div>
         </div>
       )}
+
+      {/* ------------------------------------------------------------ AI assistant (one chat per lesson) */}
+      {lessonQuery.data && <StudyAssistant key={lessonId} slug={slug} lesson={lessonQuery.data.lesson} />}
 
       {/* ------------------------------------------------------------ Completion */}
       <Modal

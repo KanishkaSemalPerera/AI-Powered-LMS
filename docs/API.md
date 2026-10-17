@@ -107,6 +107,19 @@ Payment safety: the amount and currency charged by Stripe must match the recorde
 
 Progress is `floor(completed / total lessons × 100)`. Resume order: last visited lesson → first incomplete lesson → first lesson.
 
+### AI features (Claude, called only from the backend)
+
+All AI endpoints are limited to `AI_RATE_LIMIT_PER_MINUTE` requests per minute per user (429) and `AI_RATE_LIMIT_PER_DAY` per day (429 with `errors.ai = ["daily_limit"]`). Every model call is logged in `ai_requests` (feature, model, input/output tokens, duration, status, error). AI errors use the standard envelope with `errors.ai` set to one of `not_configured`, `misconfigured`, `busy`, `timeout`, `unavailable`, `refused`, `invalid_output`, `bad_request`.
+
+| Method | URL | Role | Description |
+|---|---|---|---|
+| GET | `/ai/usage` | Auth | `{ configured, used_today, daily_limit, remaining_today }` |
+| POST | `/instructor/lessons/{id}/ai/quiz` | Instructor (owner) | `{ num_questions (1–15), difficulty: easy\|medium\|hard, source_text? (100–30000 chars; defaults to the lesson content), replace? }` → saves and returns a **draft** quiz (`is_ai_generated: true`). 409 if a quiz exists and `replace` is not true |
+| POST | `/instructor/ai/course-description` | Instructor | `{ title, subtitle?, category?, level?, notes?, tone?: friendly\|professional\|enthusiastic\|concise, course_id? }` → `{ subtitle, description, what_you_will_learn[] }` (nothing is saved) |
+| POST | `/learn/{slug}/lessons/{id}/assistant` | Enrolled student (owner/admin preview) | `{ question, history?: [{ role: user\|assistant, content }] }` → `{ answer (Markdown), usage }`. The lesson content is sent to Claude as context |
+
+The quiz generator requests strict JSON (structured outputs) and the backend still validates it (question/option counts, correct index in range, distinct options) before saving.
+
 ### Instructor — role `instructor`, own courses only
 
 | Method | URL | Description |
